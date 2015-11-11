@@ -1,3 +1,5 @@
 *reports*/*.txt
 *.class
 .idea
+
+out/
