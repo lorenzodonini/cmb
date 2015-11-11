@@ -30,3 +30,15 @@ kinds of people
 	professors (hold lectures)
 	students (listen to lectures)
 	others (optional)
+
+
+states/destinations
+	goto entrance (from edge to entrance)
+	goto origin (from entrance to edge of simulation area)
+	leave building (goto entrance from inside)
+
+	lecture
+	bathroom
+	library
+	main hall
+	mensa
