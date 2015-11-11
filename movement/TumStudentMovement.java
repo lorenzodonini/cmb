@@ -19,11 +19,11 @@ public class TumStudentMovement extends TumCharacter {
             new Coord( 100, 100 )
     );
 
-    public TumStudentMovement(Settings settings) {
+    public TumStudentMovement(final Settings settings) {
         super(settings);
     }
 
-    public TumStudentMovement(TumCharacter other) {
+    public TumStudentMovement(final TumCharacter other) {
         super(other);
     }
 
