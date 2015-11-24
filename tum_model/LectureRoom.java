@@ -1,6 +1,7 @@
 package tum_model;
 
 import core.Coord;
+import jdk.nashorn.internal.parser.Lexer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +46,23 @@ public class LectureRoom {
     {
         lectures = new ArrayList<>();
 
-        // remember set lectures room to this
+        // loop over some breaking condition
+        for(int i = 0; i < 10; ++i) { // CHANGE this condition
+
+            // create a new lecture
+            Lecture newLecture = new Lecture();
+            newLecture.room = this;
+
+            // assign a time slot to the lecture here
+            // the timeslots of all the lectures of this room MUST NOT overlap
+            // maybe change the loop condition to something related to the time
+
+            //>>
 
 
+            // add new lecture to internal lecture storage
+            lectures.add(newLecture);
+        }
     }
 
 }

@@ -152,7 +152,7 @@ public final class FmiBuilding {
         // generate or initialize lecture rooms
 
 
-        
+        //>>
 
     }
 }
