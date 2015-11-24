@@ -149,8 +149,10 @@ public final class FmiBuilding {
 
     private static void initRooms()
     {
-
         // generate or initialize lecture rooms
+
+
+        
 
     }
 }

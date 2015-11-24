@@ -8,7 +8,6 @@ import movement.TumCharacter;
  */
 public class LeaveSimulationAreaState implements IState {
 
-
     @Override
     public Path getPath(TumCharacter node) {
         return null;

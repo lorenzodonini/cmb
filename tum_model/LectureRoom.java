@@ -45,7 +45,7 @@ public class LectureRoom {
     {
         lectures = new ArrayList<>();
 
-        // set lectures room to this
+        // remember set lectures room to this
 
 
     }
