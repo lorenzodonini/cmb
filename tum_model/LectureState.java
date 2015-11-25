@@ -1,16 +1,29 @@
 package tum_model;
 
+import core.Settings;
 import movement.Path;
-import movement.TumCharacter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by rober on 22-Nov-15.
  */
 public class LectureState implements IState
 {
-    @Override
-    public Path getPath(TumCharacter node) {
+    private List<LectureRoom> lectureRooms;
 
+    public LectureState(final Settings settings) {
+        lectureRooms = new ArrayList<>();
+    }
+
+    @Override
+    public void enterState(TumCharacter character) {
+
+    }
+
+    @Override
+    public Path getPathForCharacter(TumCharacter character) {
         // get random lecture from available lectures
         // first get all lecutre rooms from fmi building
         // then select random room and then select random lecture that starts within the next x minutes
@@ -31,7 +44,16 @@ public class LectureState implements IState
 
         //>>
 
+        return null;
+    }
 
-        return null; // return path
+    @Override
+    public double getPauseTimeForCharacter(TumCharacter character) {
+        return 0;
+    }
+
+    @Override
+    public void exitState(TumCharacter character) {
+
     }
 }

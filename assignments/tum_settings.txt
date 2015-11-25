@@ -2,15 +2,17 @@
 
 Scenario.name = TumScenario
 Scenario.endTime = 6000
-Scenario.updateInterval = 0.1
+Scenario.updateInterval = 1
 Scenario.simulateConnections = false
 MovementModel.worldSize = 1000,1000
 Events.nrof = 0
 
 # Groups
 Scenario.nrofHostGroups = 1
+Scenario.hallUpperLeft = 100,100
+Scenario.hallSize = 800,450
 Group1.groupID = student
-Group1.nrofHosts = 10
+Group1.nrofHosts = 3
 Group1.nrofInterfaces = 1
 Group1.interface1 = myInterface
 

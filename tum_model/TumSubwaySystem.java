@@ -1,4 +1,4 @@
-package movement;
+package tum_model;
 
 import java.util.Queue;
 

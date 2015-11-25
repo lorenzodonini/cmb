@@ -1,19 +1,19 @@
 package tum_model;
 
 import core.Coord;
-import jdk.nashorn.internal.parser.Lexer;
+//import jdk.nashorn.internal.parser.Lexer;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by rober on 22-Nov-15.
+ * Created by robert on 22-Nov-15.
  */
 public class LectureRoom {
 
     private Coord position;
     private int capacity;
-    List<Lecture> lectures;
+    private List<Lecture> lectures;
 
     public LectureRoom(Coord position, int capacity)
     {
@@ -64,5 +64,4 @@ public class LectureRoom {
             lectures.add(newLecture);
         }
     }
-
 }

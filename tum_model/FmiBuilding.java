@@ -5,6 +5,7 @@ import input.WKTReader;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public final class FmiBuilding {
         stretch = targetWidth / (lowerRight.getX() - origin.getX());
 
         WKTReader reader = new WKTReader();
-        File buildingFile = new File("/data/fmi.wkt");
+        File buildingFile = new File("data/fmi.wkt");
         try {
             buildingPoints = reader.readPoints(buildingFile);
             System.out.println("read fmi points");
@@ -45,7 +46,10 @@ public final class FmiBuilding {
             System.out.println("could not read fmi points");
         }
 
+    }
 
+    public static Coord getRandomCoordInsideBuilding() {
+        return null;
     }
 
     public static boolean isInside(Coord pos)
