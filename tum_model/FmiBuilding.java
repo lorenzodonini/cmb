@@ -1,7 +1,6 @@
 package tum_model;
 
 import core.Coord;
-import gui.playfield.MapGraphic;
 import input.WKTReader;
 import movement.map.MapNode;
 import movement.map.SimMap;
@@ -88,7 +87,7 @@ public final class FmiBuilding {
     }
 
 
-    public static MapGraphic getMapGraphic()
+    public static SimMap getMap()
     {
         Map<Coord, MapNode> nodeDict = new HashMap<>();
         MapNode connectedNode = new MapNode(buildingPoints.get(buildingPoints.size() - 1));
@@ -99,8 +98,7 @@ public final class FmiBuilding {
             connectedNode = node;
         }
 
-        SimMap map = new SimMap(nodeDict);
-        return new MapGraphic(map);
+        return new SimMap(nodeDict);
     }
 
 

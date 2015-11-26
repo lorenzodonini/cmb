@@ -17,6 +17,7 @@ import javax.swing.JSplitPane;
 
 import core.Settings;
 import core.World;
+import tum_model.FmiBuilding;
 
 /**
  * Main window for the program. Takes care of layouting the main components
@@ -65,6 +66,7 @@ public class MainWindow extends JFrame {
         
     	setLayout(new BorderLayout());
         setJMenuBar(new SimMenuBar(field, chooser));
+        field.setMap(FmiBuilding.getMap());
         
         playFieldScroll = new JScrollPane(field);
         playFieldScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 
