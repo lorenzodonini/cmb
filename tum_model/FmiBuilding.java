@@ -1,13 +1,17 @@
 package tum_model;
 
 import core.Coord;
+import gui.playfield.MapGraphic;
 import input.WKTReader;
+import movement.map.MapNode;
+import movement.map.SimMap;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by rober on 11-Nov-15.
@@ -22,14 +26,13 @@ public final class FmiBuilding {
     private static List<LectureRoom> rooms;
 
     static {
-
         entrances = new Coord[1];
         entrances[0] = new Coord(100, 0);
 
         origin = new Coord(11.666289567947388, 48.263761179294036);
         lowerRight = new Coord(11.66995882987976,48.26151847535056);
 
-        final double targetWidth = 100.0d;
+        final double targetWidth = 1000.0d;
         stretch = targetWidth / (lowerRight.getX() - origin.getX());
 
         WKTReader reader = new WKTReader();
@@ -83,6 +86,23 @@ public final class FmiBuilding {
         final int count = countIntersectedEdges( polygon, point, new Coord( -10,0 ) );
         return ( ( count % 2 ) != 0 );
     }
+
+
+    public static MapGraphic getMapGraphic()
+    {
+        Map<Coord, MapNode> nodeDict = new HashMap<>();
+        MapNode connectedNode = new MapNode(buildingPoints.get(buildingPoints.size() - 1));
+        for(Coord point : buildingPoints) {
+            MapNode node = new MapNode(point);
+            node.addNeighbor(connectedNode);
+            nodeDict.put(node.getLocation(), node);
+            connectedNode = node;
+        }
+
+        SimMap map = new SimMap(nodeDict);
+        return new MapGraphic(map);
+    }
+
 
     private static int countIntersectedEdges(
             final List <Coord> polygon,

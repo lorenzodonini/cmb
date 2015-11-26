@@ -12,7 +12,6 @@ public class TumStudentMovement extends TumCharacter {
 
     public TumStudentMovement(final Settings settings) {
         super(settings);
-        FmiBuilding.getEntrances();
         if (!StateGenerator.getInstance().bIsInitialized()) {
             StateGenerator.getInstance().initializeStates(settings);
         }
