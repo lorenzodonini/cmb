@@ -1,6 +1,7 @@
 package tum_model;
 
 import core.Settings;
+import movement.TumCharacter;
 
 import java.util.*;
 
@@ -34,12 +35,16 @@ public class StateGenerator {
         availableStates.put(TumAction.INDIVIDUAL_STUDY, commonState);
         keyList.add(TumAction.SOCIAL);
         availableStates.put(TumAction.SOCIAL, commonState);
+
         IState bathroomState = new BathroomState();
         keyList.add(TumAction.RESTROOM);
         availableStates.put(TumAction.RESTROOM, bathroomState);
+
+        IState lectureState = new LectureState();
+        availableStates.put(TumAction.LECTURE, lectureState);
     }
 
-    public boolean bIsInitialized() {
+    public boolean isInitialized() {
         return !availableStates.isEmpty();
     }
 
@@ -52,8 +57,14 @@ public class StateGenerator {
     }
 
     public void setNextAction(TumCharacter character) {
-        //TO IMPLEMENT
-        TumAction action = generateRandomAction();
+        TumAction action;
+        double timeUntilNextLecture = character.getTimeUntilNextLecture();
+        if (timeUntilNextLecture > 0 && timeUntilNextLecture < 5 * 60) {
+            action = TumAction.LECTURE;
+        } else {
+            action = generateRandomAction();
+        }
+        //NEED TO IMPLEMENT MORE CONDITIONS
         character.setCurrentAction(action);
     }
 
@@ -67,3 +78,4 @@ public class StateGenerator {
         }
     }
 }
+

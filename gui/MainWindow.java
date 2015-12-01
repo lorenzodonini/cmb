@@ -66,7 +66,7 @@ public class MainWindow extends JFrame {
         
     	setLayout(new BorderLayout());
         setJMenuBar(new SimMenuBar(field, chooser));
-        field.setMap(FmiBuilding.getMap());
+        field.setMap(FmiBuilding.getInstance().getMap());
         
         playFieldScroll = new JScrollPane(field);
         playFieldScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 

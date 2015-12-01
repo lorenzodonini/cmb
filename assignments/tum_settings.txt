@@ -10,7 +10,7 @@ Events.nrof = 0
 # Groups
 Scenario.nrofHostGroups = 1
 Scenario.hallUpperLeft = 100,100
-Scenario.hallSize = 1000,1000
+Scenario.hallSize = 800,450
 Group1.groupID = student
 Group1.nrofHosts = 30
 Group1.nrofInterfaces = 1

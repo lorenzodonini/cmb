@@ -3,6 +3,7 @@ package tum_model;
 import core.Coord;
 import core.SimClock;
 import movement.Path;
+import movement.TumCharacter;
 
 /**
  * Created by lorenzodonini on 25/11/15.
@@ -12,7 +13,7 @@ public class BathroomState implements IState {
 
 
     public BathroomState() {
-        bathroomCoord = new Coord(400,545);
+        bathroomCoord = new Coord(200,545);
     }
 
     @Override

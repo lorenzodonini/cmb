@@ -1,20 +1,15 @@
 package tum_model;
 
-import core.Settings;
+import core.Coord;
 import movement.Path;
-
-import java.util.ArrayList;
-import java.util.List;
+import movement.TumCharacter;
 
 /**
  * Created by rober on 22-Nov-15.
  */
 public class LectureState implements IState
 {
-    private List<LectureRoom> lectureRooms;
-
-    public LectureState(final Settings settings) {
-        lectureRooms = new ArrayList<>();
+    public LectureState() {
     }
 
     @Override
@@ -43,17 +38,22 @@ public class LectureState implements IState
         // take the time until the lecture starts into account
 
         //>>
-
-        return null;
+        Coord coord = character.getNextScheduledLecture().getLectureRoom().getPosition();
+        final Path p = new Path(character.getDefaultSpeed());
+        p.addWaypoint(character.getLastLocation());
+        p.addWaypoint(coord);
+        return p;
     }
 
     @Override
     public double getPauseTimeForCharacter(TumCharacter character) {
-        return 0;
+        Lecture lecture = character.getNextScheduledLecture();
+        return lecture.getEndTime() - lecture.getStartTime();
     }
 
     @Override
     public void exitState(TumCharacter character) {
-
+        character.attendNextLecture();
     }
 }
+

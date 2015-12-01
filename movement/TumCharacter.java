@@ -1,8 +1,11 @@
-package tum_model;
+package movement;
 
 import core.Coord;
 import core.Settings;
-import movement.MovementModel;
+import tum_model.FmiBuilding;
+import tum_model.IState;
+import tum_model.Lecture;
+import tum_model.TumAction;
 
 import java.util.List;
 
@@ -18,7 +21,6 @@ public abstract class TumCharacter extends MovementModel {
     protected int scheduledLectures;
     private IState currentState;
     private TumAction currentAction;
-
 
     //CTOR
     public TumCharacter(final Settings settings) {
@@ -37,8 +39,16 @@ public abstract class TumCharacter extends MovementModel {
     }
 
     public double getDefaultSpeed() {
-        return super.generateSpeed();
+        return 10.0;
     }
+
+    public abstract boolean hasOtherScheduledLectures();
+
+    public abstract Lecture getNextScheduledLecture();
+
+    public abstract double getTimeUntilNextLecture();
+
+    public abstract void attendNextLecture();
 
     public boolean hasEaten() {
         return bHasEaten;
@@ -100,8 +110,9 @@ public abstract class TumCharacter extends MovementModel {
             double x = rng.nextDouble() * getMaxX();
             double y = rng.nextDouble() * getMaxY();
             c = new Coord(x,y);
-        } while (!FmiBuilding.isInside(polygon, c));
+        } while (!FmiBuilding.getInstance().isInside(polygon, c));
         lastWaypoint = c;
         return lastWaypoint;
     }
 }
+

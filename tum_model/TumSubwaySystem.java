@@ -1,5 +1,7 @@
 package tum_model;
 
+import movement.TumCharacter;
+
 import java.util.Queue;
 
 /**

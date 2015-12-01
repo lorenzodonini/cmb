@@ -5,20 +5,22 @@ import core.Coord;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by robert on 22-Nov-15.
  */
 public class LectureRoom {
-
+    private static final double timeSlot = 3600;
     private Coord position;
     private int capacity;
     private List<Lecture> lectures;
 
-    public LectureRoom(Coord position, int capacity)
+    public LectureRoom(Coord pos, int cap)
     {
-        this.position = position;
-        this.capacity = capacity;
+        position = pos;
+        capacity = cap;
+        lectures = new ArrayList<>();
     }
 
     public Coord getPosition()
@@ -34,34 +36,43 @@ public class LectureRoom {
 
     public List<Lecture> getLectures()
     {
-        if(lectures == null) {
-            generateLectures();
-        }
-
         return lectures;
     }
 
     // generates a random list of lectures for this room
-    private void generateLectures()
+    public void generateLectures(Random random, double lectureStart, double lectureDuration, double lectureEnd, double timeSlot)
     {
-        lectures = new ArrayList<>();
+        double singleHourProbability = 0.1;
+        double doubleHourProbability = 0.9;
+        double longLectureDuration = lectureDuration * 2;
 
-        // loop over some breaking condition
-        for(int i = 0; i < 10; ++i) { // CHANGE this condition
+        double time = lectureStart;
+        while (time < lectureEnd) {
+            double result = random.nextDouble();
+            if (result <= singleHourProbability) {
+                double startOffset = random.nextInt(15);
+                double endOffset = (startOffset < 10) ? random.nextInt(5) : 0;
+                Lecture newLecture = new Lecture(time + startOffset, time + lectureDuration + endOffset, 1,this);
+                lectures.add(newLecture);
+                time += timeSlot;
+            }
+            else if (result <= doubleHourProbability && (lectureEnd - time) > longLectureDuration ) {
+                double startOffset = random.nextInt(15);
+                double endOffset = random.nextInt(5);
+                Lecture newLecture = new Lecture(time + startOffset, time + longLectureDuration + endOffset, 2,this);
+                lectures.add(newLecture);
+                time += timeSlot * 2;
+            }
+            else {
+                time += timeSlot;
+            }
+        }
+        //We will be moving forward from second
+    }
 
-            // create a new lecture
-            Lecture newLecture = new Lecture();
-            newLecture.room = this;
-
-            // assign a time slot to the lecture here
-            // the timeslots of all the lectures of this room MUST NOT overlap
-            // maybe change the loop condition to something related to the time
-
-            //>>
-
-
-            // add new lecture to internal lecture storage
-            lectures.add(newLecture);
+    public void printLectures() {
+        for (Lecture l : lectures) {
+            System.out.println("Lecture: " + l.getStartTime() + " - " + l.getEndTime());
         }
     }
 }

@@ -1,30 +1,51 @@
 package tum_model;
 
 import core.Coord;
+import core.Settings;
 import input.WKTReader;
+import movement.TumCharacter;
 import movement.map.MapNode;
 import movement.map.SimMap;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by rober on 11-Nov-15.
  */
 public final class FmiBuilding {
 
-    private static final Coord lowerRight;
-    private static final Coord[] entrances;
-    private static final Coord origin;
-    private static final double stretch;
-    private static List<Coord> buildingPoints;
-    private static List<LectureRoom> rooms;
+    private Coord lowerRight;
+    private Coord[] entrances;
+    private Coord origin;
+    private double stretch;
+    private List<Coord> buildingPoints;
 
-    static {
+    private TimeSlot [] timeSlots;
+    private List<LectureRoom> rooms;
+
+    private double lectureStartTime;
+    private double lectureDuration;
+    private double lectureEndTime;
+    private double timeSlot;
+    private static FmiBuilding mInstance;
+    private Random mRandom;
+
+    private static final String BUILDING_NAMESPACE = "Building";
+    private static final String SETTINGS_LECTURE_START = "lectureStartTime";
+    private static final String SETTINGS_LECTURE_DURATION = "lectureDuration";
+    private static final String SETTINGS_LECTURE_END = "lectureEndTime";
+    private static final String SETTINGS_TIME_SLOT = "timeSlot";
+
+    public static FmiBuilding getInstance() {
+        if (mInstance == null) {
+            mInstance = new FmiBuilding();
+        }
+        return mInstance;
+    }
+
+    private FmiBuilding() {
         entrances = new Coord[1];
         entrances[0] = new Coord(100, 0);
 
@@ -47,33 +68,147 @@ public final class FmiBuilding {
             buildingPoints = new ArrayList<>();
             System.out.println("could not read fmi points");
         }
-
     }
 
-    public static Coord getRandomCoordInsideBuilding() {
+    public boolean isInitialized() {
+        return timeSlots != null;
+    }
+
+    public void initializeFmiBuilding(final Settings settings) {
+        settings.setNameSpace(BUILDING_NAMESPACE);
+        lectureStartTime = settings.getDouble(SETTINGS_LECTURE_START);
+        lectureDuration = settings.getDouble(SETTINGS_LECTURE_DURATION);
+        lectureEndTime = settings.getDouble(SETTINGS_LECTURE_END);
+        timeSlot = settings.getDouble(SETTINGS_TIME_SLOT);
+        settings.restoreNameSpace();
+
+        mRandom = new Random();
+        //We build an array. Each element is a time slot, based on the time unit (e.g. 1h)
+        int nSlots = (int)((lectureEndTime - lectureStartTime) / timeSlot);
+        timeSlots = new TimeSlot[nSlots];
+        for (int i=0; i<timeSlots.length; i++) {
+            double start = lectureStartTime + timeSlot * i;
+            double end = start + timeSlot;
+            timeSlots[i] = new TimeSlot(start, end);
+        }
+        //Afterwards we generate rooms and actual lectures
+        generateRooms();
+    }
+
+    private void generateRooms() {
+        rooms = new ArrayList<>();
+        //CREATING SOME STATIC ROOMS
+
+        //HOERSAAL 1
+        LectureRoom hoersaal1 = new LectureRoom(new Coord(800,200),500);
+        hoersaal1.generateLectures(mRandom,lectureStartTime,lectureDuration,lectureEndTime,timeSlot);
+        System.out.println("Hoersaal 1:");
+        hoersaal1.printLectures();
+        sortPlannedLectures(hoersaal1.getLectures());
+        rooms.add(hoersaal1);
+        //HOERSAAL 2
+        LectureRoom hoersaal2 = new LectureRoom(new Coord(800,300),200);
+        hoersaal2.generateLectures(mRandom,lectureStartTime,lectureDuration,lectureEndTime,timeSlot);
+        System.out.println("Hoersaal 2:");
+        hoersaal2.printLectures();
+        sortPlannedLectures(hoersaal2.getLectures());
+        rooms.add(hoersaal2);
+        //SEMINAR ROOM 1
+        LectureRoom seminar1 = new LectureRoom(new Coord(800,400),50);
+        seminar1.generateLectures(mRandom,lectureStartTime,lectureDuration,lectureEndTime,timeSlot);
+        System.out.println("Seminar 1:");
+        seminar1.printLectures();
+        sortPlannedLectures(seminar1.getLectures());
+        rooms.add(seminar1);
+        //SEMINAR ROOM 2
+        LectureRoom seminar2 = new LectureRoom(new Coord(800,500),30);
+        seminar2.generateLectures(mRandom,lectureStartTime,lectureDuration,lectureEndTime,timeSlot);
+        System.out.println("Seminar 2:");
+        seminar2.printLectures();
+        sortPlannedLectures(seminar2.getLectures());
+        rooms.add(seminar2);
+    }
+
+    private void sortPlannedLectures(List<Lecture> lectures) {
+        for (Lecture l : lectures) {
+            int start = (int)((l.getStartTime() - lectureStartTime) / timeSlot);
+            timeSlots[start].addLecture(l);
+        }
+    }
+
+    public Queue<Lecture> getRandomLectureSchedule(TumCharacter character) {
+        double prob = 0;
+        double probAttending = 0.75;
+        double probPopHigh = 0.45;
+        double probPopMed = 0.15;
+        Lecture lecture = null;
+        Queue<Lecture> lectures = new LinkedList<>();
+        int i=0;
+        while (i<timeSlots.length) {
+            prob = mRandom.nextDouble();
+            if (prob <= probAttending) {
+                //We will attend a lecture in this time slot
+                boolean bFound = false;
+                //We could get classes which are already full. Gonna try multiple times, until I get a good one.
+                prob = mRandom.nextDouble();
+                if (prob >= probPopHigh) {
+                    //Attending a lecture with high popularity
+                    lecture = timeSlots[i].getRandomLectureByPopularity(Lecture.POPULARITY_HIGH);
+                    if (lecture != null) {
+                        bFound = true;
+                    }
+                }
+                //BROKEN LOGIC! OPTIMISE IT
+                if (prob >= probPopMed || !bFound) {
+                    //Attending a lecture with medium popularity
+                    lecture = timeSlots[i].getRandomLectureByPopularity(Lecture.POPULARITY_MEDIUM);
+                    if (lecture != null) {
+                        bFound = true;
+                    }
+                }
+                if (prob < probPopMed || !bFound) {
+                    lecture = timeSlots[i].getRandomLectureByPopularity(Lecture.POPULARITY_LOW);
+                }
+                if (lecture == null) {
+                    i++; //Gonna check next time slot
+                    continue;
+                }
+                if (lecture.getAvailableSpots() > 0) {
+                    bFound = true;
+                    //Incrementing by the amount of slots taken by this lecture, since I'll be busy in that time.
+                    i += lecture.getTimeSlots();
+                    lecture.register(character);
+                    lectures.add(lecture);
+                }
+
+            }
+            else {
+                i++; //Gonna check next time slot again
+            }
+        }
+        return lectures;
+    }
+
+    public Coord getRandomCoordInsideBuilding() {
         return null;
     }
 
-    public static boolean isInside(Coord pos)
+    public boolean isInside(Coord pos)
     {
         return isInside(buildingPoints, pos);
     }
 
-    public static Coord[] getEntrances()
+    public Coord[] getEntrances()
     {
         return entrances;
     }
 
-    public static List<LectureRoom> getRooms()
+    public List<LectureRoom> getRooms()
     {
         return rooms;
     }
 
-    // private constructor because class is just a collection of static methods
-    private FmiBuilding() { }
-
-
-    private static void transformToOrigin(Coord point)
+    private void transformToOrigin(Coord point)
     {
         point.setLocation(
                 stretch * (point.getX() - origin.getX()),
@@ -81,13 +216,13 @@ public final class FmiBuilding {
     }
 
 
-    public static boolean isInside(final List<Coord> polygon, final Coord point ) {
+    public boolean isInside(final List<Coord> polygon, final Coord point ) {
         final int count = countIntersectedEdges( polygon, point, new Coord( -10,0 ) );
         return ( ( count % 2 ) != 0 );
     }
 
 
-    public static SimMap getMap()
+    public SimMap getMap()
     {
         Map<Coord, MapNode> nodeDict = new HashMap<>();
         MapNode connectedNode = new MapNode(buildingPoints.get(buildingPoints.size() - 1));
@@ -168,13 +303,39 @@ public final class FmiBuilding {
         return new double[] { A, B, C };
     }
 
+    private class TimeSlot {
+        private Map<Short, List<Lecture>> plannedLectures;
+        public double startTime;
+        public double endTime;
 
-    private static void initRooms()
-    {
-        // generate or initialize lecture rooms
+        public TimeSlot(double start, double end) {
+            startTime = start;
+            endTime = end;
+            plannedLectures = new HashMap<>(3); //TODO: STATIC! BEWARE
+            plannedLectures.put(Lecture.POPULARITY_LOW, new ArrayList<Lecture>());
+            plannedLectures.put(Lecture.POPULARITY_MEDIUM, new ArrayList<Lecture>());
+            plannedLectures.put(Lecture.POPULARITY_HIGH, new ArrayList<Lecture>());
+        }
 
+        public void addLecture(Lecture lecture) {
+            plannedLectures.get(lecture.getPopularity()).add(lecture);
+        }
 
-        //>>
+        public Lecture getRandomLectureByPopularity(short popularity) {
+            List<Lecture> lectures = plannedLectures.get(popularity);
+            if (lectures.size() == 0) {
+                return null; //Might be empty for this time slot
+            }
+            int index = mRandom.nextInt(lectures.size());
+            return lectures.get(index);
+        }
 
+        public List<Lecture> getLecturesByPopularity(short popularity) {
+            return plannedLectures.get(popularity);
+        }
+
+        public Map<Short, List<Lecture>> getAllLectures() {
+            return plannedLectures;
+        }
     }
 }

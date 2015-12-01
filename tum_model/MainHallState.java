@@ -3,6 +3,7 @@ package tum_model;
 import core.Coord;
 import core.Settings;
 import movement.Path;
+import movement.TumCharacter;
 
 import java.util.Random;
 
@@ -41,31 +42,39 @@ public class MainHallState implements IState {
 
         do {
             coord = new Coord(randomGenerator.nextDouble() * lowerRightCorner.getX(), randomGenerator.nextDouble() * lowerRightCorner.getY());
-        } while (!FmiBuilding.isInside(coord));
+        } //while (!FmiBuilding.getInstance().isInside(coord));
+        while (!isInside(coord));
         p.addWaypoint(coord);
         return p;
     }
 
     public double getPauseTimeForCharacter(TumCharacter character) {
         double minutes = 0;
+        double time = character.getTimeUntilNextLecture();
+        if (time <= 0) {
+            time = 0;
+        }
+        else {
+            time = Math.max(time - 5*60, 0);
+        }
         switch (character.getCurrentAction()) {
             case EAT:
-                minutes = 10;
+                minutes = 15;
                 break;
             case INDIVIDUAL_STUDY:
                 minutes = 30;
                 break;
             case GROUP_STUDY:
-                minutes = 3;
+                minutes = 20;
                 break;
             case SOCIAL:
-                minutes = 2;
+                minutes = 5;
                 break;
             default:
                 minutes = 0;
                 break;
         }
-        return minutes * 60; //*60 seconds
+        return Math.min(minutes * 60, time);
     }
 
     @Override
@@ -81,3 +90,4 @@ public class MainHallState implements IState {
                 && y > upperLeftCorner.getY() && y < lowerRightCorner.getY();
     }
 }
+
