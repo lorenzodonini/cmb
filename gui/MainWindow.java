@@ -66,7 +66,6 @@ public class MainWindow extends JFrame {
         
     	setLayout(new BorderLayout());
         setJMenuBar(new SimMenuBar(field, chooser));
-        field.setMap(FmiBuilding.getInstance().getMap());
         
         playFieldScroll = new JScrollPane(field);
         playFieldScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 
@@ -97,7 +96,7 @@ public class MainWindow extends JFrame {
         mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
         		fieldLogSplit, hostListScroll);
         mainSplit.setOneTouchExpandable(true);
-        mainSplit.setResizeWeight(0.8);    
+        mainSplit.setResizeWeight(0.8);
         this.getContentPane().add(mainSplit);
         
         pack();

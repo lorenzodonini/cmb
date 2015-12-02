@@ -50,7 +50,7 @@ public final class FmiBuilding {
         entrances[0] = new Coord(100, 0);
 
         origin = new Coord(11.666289567947388, 48.263761179294036);
-        lowerRight = new Coord(11.66995882987976,48.26151847535056);
+        lowerRight = new Coord(11.66995882987976, 48.26151847535056);
 
         final double targetWidth = 1000.0d;
         stretch = targetWidth / (lowerRight.getX() - origin.getX());
@@ -212,7 +212,8 @@ public final class FmiBuilding {
     {
         point.setLocation(
                 stretch * (point.getX() - origin.getX()),
-                stretch * (point.getY() - origin.getY()));
+                stretch * (origin.getY() - point.getY())
+        );
     }
 
 

@@ -13,8 +13,10 @@ import java.util.List;
 
 import movement.MapBasedMovement;
 import movement.MovementModel;
+import movement.TumStudentMovement;
 import movement.map.SimMap;
 import routing.MessageRouter;
+import tum_model.FmiBuilding;
 
 /**
  * A simulation scenario used for getting and storing the settings of a
@@ -380,6 +382,9 @@ public class SimScenario implements Serializable {
 
 			if (mmProto instanceof MapBasedMovement) {
 				this.simMap = ((MapBasedMovement)mmProto).getMap();
+
+			} else if (mmProto instanceof TumStudentMovement) {
+				this.simMap = FmiBuilding.getInstance().getMap();
 			}
 
 			// creates hosts of ith group
