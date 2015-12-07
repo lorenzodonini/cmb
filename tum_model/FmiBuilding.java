@@ -21,8 +21,9 @@ public final class FmiBuilding {
     private Coord origin;
     private double stretch;
     private List<Coord> buildingPoints;
+    private List<List<Coord>> fingers;
 
-    private TimeSlot [] timeSlots;
+    private TimeSlot[] timeSlots;
     private List<LectureRoom> rooms;
 
     private double lectureStartTime;
@@ -60,7 +61,7 @@ public final class FmiBuilding {
         try {
             buildingPoints = reader.readPoints(buildingFile);
             System.out.println("read fmi points");
-            for(Coord point : buildingPoints) {
+            for (Coord point : buildingPoints) {
                 transformToOrigin(point);
             }
 
@@ -68,6 +69,8 @@ public final class FmiBuilding {
             buildingPoints = new ArrayList<>();
             System.out.println("could not read fmi points");
         }
+
+        readFingers();
     }
 
     public boolean isInitialized() {
@@ -84,9 +87,9 @@ public final class FmiBuilding {
 
         mRandom = new Random();
         //We build an array. Each element is a time slot, based on the time unit (e.g. 1h)
-        int nSlots = (int)((lectureEndTime - lectureStartTime) / timeSlot);
+        int nSlots = (int) ((lectureEndTime - lectureStartTime) / timeSlot);
         timeSlots = new TimeSlot[nSlots];
-        for (int i=0; i<timeSlots.length; i++) {
+        for (int i = 0; i < timeSlots.length; i++) {
             double start = lectureStartTime + timeSlot * i;
             double end = start + timeSlot;
             timeSlots[i] = new TimeSlot(start, end);
@@ -100,29 +103,29 @@ public final class FmiBuilding {
         //CREATING SOME STATIC ROOMS
 
         //HOERSAAL 1
-        LectureRoom hoersaal1 = new LectureRoom(new Coord(800,200),500);
-        hoersaal1.generateLectures(mRandom,lectureStartTime,lectureDuration,lectureEndTime,timeSlot);
+        LectureRoom hoersaal1 = new LectureRoom(new Coord(800, 200), 500);
+        hoersaal1.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
         System.out.println("Hoersaal 1:");
         hoersaal1.printLectures();
         sortPlannedLectures(hoersaal1.getLectures());
         rooms.add(hoersaal1);
         //HOERSAAL 2
-        LectureRoom hoersaal2 = new LectureRoom(new Coord(800,300),200);
-        hoersaal2.generateLectures(mRandom,lectureStartTime,lectureDuration,lectureEndTime,timeSlot);
+        LectureRoom hoersaal2 = new LectureRoom(new Coord(800, 300), 200);
+        hoersaal2.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
         System.out.println("Hoersaal 2:");
         hoersaal2.printLectures();
         sortPlannedLectures(hoersaal2.getLectures());
         rooms.add(hoersaal2);
         //SEMINAR ROOM 1
-        LectureRoom seminar1 = new LectureRoom(new Coord(800,400),50);
-        seminar1.generateLectures(mRandom,lectureStartTime,lectureDuration,lectureEndTime,timeSlot);
+        LectureRoom seminar1 = new LectureRoom(new Coord(800, 400), 50);
+        seminar1.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
         System.out.println("Seminar 1:");
         seminar1.printLectures();
         sortPlannedLectures(seminar1.getLectures());
         rooms.add(seminar1);
         //SEMINAR ROOM 2
-        LectureRoom seminar2 = new LectureRoom(new Coord(800,500),30);
-        seminar2.generateLectures(mRandom,lectureStartTime,lectureDuration,lectureEndTime,timeSlot);
+        LectureRoom seminar2 = new LectureRoom(new Coord(800, 500), 30);
+        seminar2.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
         System.out.println("Seminar 2:");
         seminar2.printLectures();
         sortPlannedLectures(seminar2.getLectures());
@@ -131,7 +134,7 @@ public final class FmiBuilding {
 
     private void sortPlannedLectures(List<Lecture> lectures) {
         for (Lecture l : lectures) {
-            int start = (int)((l.getStartTime() - lectureStartTime) / timeSlot);
+            int start = (int) ((l.getStartTime() - lectureStartTime) / timeSlot);
             timeSlots[start].addLecture(l);
         }
     }
@@ -143,8 +146,8 @@ public final class FmiBuilding {
         double probPopMed = 0.15;
         Lecture lecture = null;
         Queue<Lecture> lectures = new LinkedList<>();
-        int i=0;
-        while (i<timeSlots.length) {
+        int i = 0;
+        while (i < timeSlots.length) {
             prob = mRandom.nextDouble();
             if (prob <= probAttending) {
                 //We will attend a lecture in this time slot
@@ -181,8 +184,7 @@ public final class FmiBuilding {
                     lectures.add(lecture);
                 }
 
-            }
-            else {
+            } else {
                 i++; //Gonna check next time slot again
             }
         }
@@ -193,23 +195,19 @@ public final class FmiBuilding {
         return null;
     }
 
-    public boolean isInside(Coord pos)
-    {
+    public boolean isInside(Coord pos) {
         return isInside(buildingPoints, pos);
     }
 
-    public Coord[] getEntrances()
-    {
+    public Coord[] getEntrances() {
         return entrances;
     }
 
-    public List<LectureRoom> getRooms()
-    {
+    public List<LectureRoom> getRooms() {
         return rooms;
     }
 
-    private void transformToOrigin(Coord point)
-    {
+    private void transformToOrigin(Coord point) {
         point.setLocation(
                 stretch * (point.getX() - origin.getX()),
                 stretch * (origin.getY() - point.getY())
@@ -217,11 +215,30 @@ public final class FmiBuilding {
     }
 
 
-    public boolean isInside(final List<Coord> polygon, final Coord point ) {
-        final int count = countIntersectedEdges( polygon, point, new Coord( -10,0 ) );
-        return ( ( count % 2 ) != 0 );
+    public boolean isInside(final List<Coord> polygon, final Coord point) {
+        final int count = countIntersectedEdges(polygon, point, new Coord(-10, 0));
+        return ((count % 2) != 0);
     }
 
+
+    public boolean isInFinger(int finger, Coord pos) {
+        return isInside(fingers.get(finger), pos);
+    }
+
+    public boolean isInMainHall(Coord pos)
+    {
+        if(!isInside(pos)) {
+            return false;
+        }
+
+        for(int i = 1; i <= 12; ++i) {
+            if(isInFinger(i, pos)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     public SimMap getMap()
     {
@@ -338,5 +355,30 @@ public final class FmiBuilding {
         public Map<Short, List<Lecture>> getAllLectures() {
             return plannedLectures;
         }
+    }
+
+
+    private void readFingers() {
+
+        fingers = new ArrayList<>();
+
+        WKTReader reader = new WKTReader();
+
+        for(int i = 0; i <= 12; ++i) {
+            String fileName = "finger" + Integer.toString(i) + ".wkt";
+            File buildingFile = new File("data/" + fileName);
+            try {
+                List<Coord> finger = reader.readPoints(buildingFile);
+                for(Coord point : finger) {
+                    transformToOrigin(point);
+                }
+                fingers.add(finger);
+            } catch (IOException e) {
+                System.out.println("error reading " + fileName);
+                List<Coord> empty = new ArrayList<>();
+                fingers.add(empty);
+            }
+        }
+
     }
 }
