@@ -47,8 +47,6 @@ public final class FmiBuilding {
     }
 
     private FmiBuilding() {
-        entrances = new Coord[1];
-        entrances[0] = new Coord(100, 0);
 
         origin = new Coord(11.666289567947388, 48.263761179294036);
         lowerRight = new Coord(11.66995882987976, 48.26151847535056);
@@ -71,6 +69,14 @@ public final class FmiBuilding {
         }
 
         readFingers();
+
+        entrances = new Coord[3];
+        entrances[0] = new Coord(11.66870892047882, 48.26251843315072);
+        entrances[1] = new Coord(11.668986529111862, 48.26231666034203);
+        entrances[2] = new Coord(11.666999012231827, 48.262704134854864);
+        for(Coord entry : entrances) {
+            transformToOrigin(entry);
+        }
     }
 
     public boolean isInitialized() {
@@ -374,7 +380,6 @@ public final class FmiBuilding {
                 }
                 fingers.add(finger);
             } catch (IOException e) {
-                System.out.println("error reading " + fileName);
                 List<Coord> empty = new ArrayList<>();
                 fingers.add(empty);
             }
