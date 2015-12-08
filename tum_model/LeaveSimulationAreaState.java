@@ -18,6 +18,7 @@ public class LeaveSimulationAreaState implements IState {
 
         Path path = new Path(character.getDefaultSpeed());
         path.addWaypoint(character.getLastLocation());
+        path.addWaypoint(character.getUsedEntry());
         path.addWaypoint(character.getInitialLocation());
         return path;
     }
