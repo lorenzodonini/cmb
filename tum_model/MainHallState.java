@@ -42,8 +42,7 @@ public class MainHallState implements IState {
 
         do {
             coord = new Coord(randomGenerator.nextDouble() * lowerRightCorner.getX(), randomGenerator.nextDouble() * lowerRightCorner.getY());
-        } //while (!FmiBuilding.getInstance().isInside(coord));
-        while (!FmiBuilding.getInstance().isInMainHall(coord));
+        } while (!FmiBuilding.getInstance().isInMainHall(coord));
         p.addWaypoint(coord);
         return p;
     }
@@ -80,14 +79,6 @@ public class MainHallState implements IState {
     @Override
     public void exitState(TumCharacter character) {
         //Do nothing here
-    }
-
-    private boolean isInside(Coord coord) {
-        double x = coord.getX();
-        double y = coord.getY();
-
-        return x > upperLeftCorner.getX() && x < lowerRightCorner.getX()
-                && y > upperLeftCorner.getY() && y < lowerRightCorner.getY();
     }
 }
 

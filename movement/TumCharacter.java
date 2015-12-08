@@ -112,16 +112,5 @@ public abstract class TumCharacter extends MovementModel {
         lastWaypoint = new Coord(100, 100);
         return lastWaypoint;
     }
-
-    protected Coord getRandomInnerCoord(final List<Coord> polygon) {
-        Coord c;
-        do {
-            double x = rng.nextDouble() * getMaxX();
-            double y = rng.nextDouble() * getMaxY();
-            c = new Coord(x,y);
-        } while (!FmiBuilding.getInstance().isInside(polygon, c));
-        lastWaypoint = c;
-        return lastWaypoint;
-    }
 }
 
