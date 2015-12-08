@@ -212,9 +212,7 @@ public final class FmiBuilding {
         return nearestEntry;
     }
 
-    public Coord getRandomCoordInsideBuilding() {
-        return null;
-    }
+
 
     public boolean isInside(Coord pos) {
         return isInside(buildingPoints, pos);
