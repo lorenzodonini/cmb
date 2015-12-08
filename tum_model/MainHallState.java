@@ -43,7 +43,7 @@ public class MainHallState implements IState {
         do {
             coord = new Coord(randomGenerator.nextDouble() * lowerRightCorner.getX(), randomGenerator.nextDouble() * lowerRightCorner.getY());
         } //while (!FmiBuilding.getInstance().isInside(coord));
-        while (!isInside(coord));
+        while (!FmiBuilding.getInstance().isInMainHall(coord));
         p.addWaypoint(coord);
         return p;
     }
