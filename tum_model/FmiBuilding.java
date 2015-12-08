@@ -197,6 +197,21 @@ public final class FmiBuilding {
         return lectures;
     }
 
+    public Coord getNearestEntry(Coord currentPos)
+    {
+        Coord nearestEntry = entrances[0];
+        double minDistance = currentPos.distance(nearestEntry);
+        for(int i = 1; i < entrances.length; ++i) {
+            double distance = entrances[i].distance(currentPos);
+            if(distance < minDistance) {
+                minDistance = distance;
+                nearestEntry = entrances[i];
+            }
+        }
+
+        return nearestEntry;
+    }
+
     public Coord getRandomCoordInsideBuilding() {
         return null;
     }

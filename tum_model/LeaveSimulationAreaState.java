@@ -15,7 +15,12 @@ public class LeaveSimulationAreaState implements IState {
 
     @Override
     public Path getPathForCharacter(TumCharacter character) {
-        return null;
+
+        Path path = new Path();
+        path.addWaypoint(character.getLastLocation());
+        path.addWaypoint(character.getInitialLocation());
+
+        return path;
     }
 
     @Override

@@ -21,6 +21,7 @@ public abstract class TumCharacter extends MovementModel {
     protected int scheduledLectures;
     private IState currentState;
     private TumAction currentAction;
+    private Coord usedEntry;
 
     //CTOR
     public TumCharacter(final Settings settings) {
@@ -36,6 +37,14 @@ public abstract class TumCharacter extends MovementModel {
     //PUBLIC ACCESSORS
     public Coord getLastLocation() {
         return lastWaypoint.clone();
+    }
+
+    public Coord getUsedEntry() {
+        return usedEntry;
+    }
+
+    public void setUsedEntry(Coord usedEntry) {
+        this.usedEntry = usedEntry;
     }
 
     public double getDefaultSpeed() {
