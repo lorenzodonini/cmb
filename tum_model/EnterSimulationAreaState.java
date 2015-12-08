@@ -22,8 +22,9 @@ public class EnterSimulationAreaState implements IState {
         Coord lastLocation = character.getLastLocation();
         Coord entryLocation = FmiBuilding.getInstance().getNearestEntry(lastLocation);
 
+        character.setUsedEntry(entryLocation);
 
-        Path path = new Path();
+        Path path = new Path(character.getDefaultSpeed());
         path.addWaypoint(lastLocation);
         path.addWaypoint(entryLocation);
 

@@ -18,6 +18,7 @@ public final class FmiBuilding {
 
     private Coord lowerRight;
     private Coord[] entrances;
+    private Coord[] spawnAreas;
     private Coord origin;
     private double stretch;
     private List<Coord> buildingPoints;
@@ -48,6 +49,8 @@ public final class FmiBuilding {
 
     private FmiBuilding() {
 
+        mRandom = new Random();
+
         origin = new Coord(11.666289567947388, 48.263761179294036);
         lowerRight = new Coord(11.66995882987976, 48.26151847535056);
 
@@ -77,6 +80,14 @@ public final class FmiBuilding {
         for(Coord entry : entrances) {
             transformToOrigin(entry);
         }
+
+        spawnAreas = new Coord[3];
+        spawnAreas[0] = new Coord(11.66920781135559, 48.26312482093316);
+        spawnAreas[1] = new Coord(11.666463911533356, 48.26274208560463);
+        spawnAreas[2] = new Coord(11.669347286224365, 48.26226434770976);
+        for(Coord spawnArea : spawnAreas) {
+            transformToOrigin(spawnArea);
+        }
     }
 
     public boolean isInitialized() {
@@ -91,7 +102,6 @@ public final class FmiBuilding {
         timeSlot = settings.getDouble(SETTINGS_TIME_SLOT);
         settings.restoreNameSpace();
 
-        mRandom = new Random();
         //We build an array. Each element is a time slot, based on the time unit (e.g. 1h)
         int nSlots = (int) ((lectureEndTime - lectureStartTime) / timeSlot);
         timeSlots = new TimeSlot[nSlots];
@@ -212,7 +222,12 @@ public final class FmiBuilding {
         return nearestEntry;
     }
 
+    public Coord getRandomSpawnPoint()
+    {
+        int index = mRandom.nextInt(3);
+        return spawnAreas[index];
 
+    }
 
     public boolean isInside(Coord pos) {
         return isInside(buildingPoints, pos);

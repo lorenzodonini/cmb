@@ -22,16 +22,29 @@ public abstract class TumCharacter extends MovementModel {
     private IState currentState;
     private TumAction currentAction;
     private Coord usedEntry;
+    private Coord initialLocation;
 
     //CTOR
     public TumCharacter(final Settings settings) {
         super(settings);
         //Other stuff
+
+        initialLocation = FmiBuilding.getInstance().getRandomSpawnPoint();
+        lastWaypoint = initialLocation;
     }
 
     public TumCharacter(final TumCharacter other) {
         super(other);
         //Copy state and other stuff
+
+
+        // this is as ugly as it gets
+        // we have to reinitialize our stuff in a copy constructor, since the owner of this class just instantiates once
+        // and then copies the class around without calling an init function
+        // so that stuff has to go here...
+
+        initialLocation = FmiBuilding.getInstance().getRandomSpawnPoint();
+        lastWaypoint = initialLocation;
     }
 
     //PUBLIC ACCESSORS
@@ -109,7 +122,7 @@ public abstract class TumCharacter extends MovementModel {
 
     @Override
     public Coord getInitialLocation() {
-        lastWaypoint = new Coord(100, 100);
+        lastWaypoint = initialLocation.clone();
         return lastWaypoint;
     }
 }

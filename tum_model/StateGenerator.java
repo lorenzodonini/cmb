@@ -42,6 +42,9 @@ public class StateGenerator {
 
         IState lectureState = new LectureState();
         availableStates.put(TumAction.LECTURE, lectureState);
+
+        IState enterState = new EnterSimulationAreaState();
+        availableStates.put(TumAction.ENTER, enterState);
     }
 
     public boolean isInitialized() {
@@ -57,6 +60,11 @@ public class StateGenerator {
     }
 
     public void setNextAction(TumCharacter character) {
+        if(character.getCurrentAction() == null) {
+            character.setCurrentAction(TumAction.ENTER);
+            return;
+        }
+
         TumAction action;
         double timeUntilNextLecture = character.getTimeUntilNextLecture();
         if (timeUntilNextLecture > 0 && timeUntilNextLecture < 5 * 60) {

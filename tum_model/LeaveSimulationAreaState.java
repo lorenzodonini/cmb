@@ -16,16 +16,15 @@ public class LeaveSimulationAreaState implements IState {
     @Override
     public Path getPathForCharacter(TumCharacter character) {
 
-        Path path = new Path();
+        Path path = new Path(character.getDefaultSpeed());
         path.addWaypoint(character.getLastLocation());
         path.addWaypoint(character.getInitialLocation());
-
         return path;
     }
 
     @Override
     public double getPauseTimeForCharacter(TumCharacter character) {
-        return 0;
+        return 0.0;
     }
 
     @Override
