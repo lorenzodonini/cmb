@@ -13,7 +13,7 @@ public class BathroomState implements IState {
     private Coord bathroomCoord;
 
     public BathroomState() {
-        bathroomCoord = new Coord(200,545);
+        bathroomCoord = FmiBuilding.getInstance().makeCoord(11.668698191642761, 48.26249450894131);
     }
 
     @Override
