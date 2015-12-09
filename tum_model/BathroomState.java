@@ -1,6 +1,7 @@
 package tum_model;
 
 import core.Coord;
+import core.Settings;
 import core.SimClock;
 import movement.Path;
 import movement.TumCharacter;
@@ -11,7 +12,6 @@ import movement.TumCharacter;
 public class BathroomState implements IState {
     private Coord bathroomCoord;
 
-
     public BathroomState() {
         bathroomCoord = new Coord(200,545);
     }
@@ -19,6 +19,8 @@ public class BathroomState implements IState {
     @Override
     public void enterState(TumCharacter character) {
         //Will need to handle a queue somehow
+        System.out.println(character.getHost().toString() + " entered " + character.getCurrentAction().name());
+        character.setLastBathroomVisitTime(SimClock.getTime());
     }
 
     @Override
@@ -40,5 +42,6 @@ public class BathroomState implements IState {
     @Override
     public void exitState(TumCharacter character) {
         //Will need to handle a queue somehow
+        System.out.println(character.getHost().toString() + " exited " + character.getCurrentAction().name());
     }
 }

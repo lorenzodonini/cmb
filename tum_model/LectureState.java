@@ -16,12 +16,13 @@ public class LectureState implements IState
 
     @Override
     public void enterState(TumCharacter character) {
-
+        TumUtilities.printStateAccessDetails(character,true);
+        character.attendNextLecture();
     }
 
     @Override
     public Path getPathForCharacter(TumCharacter character) {
-        Coord lectureLocation = character.getNextScheduledLecture().getLectureRoom().getPosition();
+        Coord lectureLocation = character.getCurrentLecture().getLectureRoom().getPosition();
         Coord lastLocation = character.getLastLocation();
         List<Coord> entryPath = FmiBuilding.getInstance().getEntryPath(lectureLocation);
 
@@ -36,13 +37,13 @@ public class LectureState implements IState
 
     @Override
     public double getPauseTimeForCharacter(TumCharacter character) {
-        Lecture lecture = character.getNextScheduledLecture();
+        Lecture lecture = character.getCurrentLecture();
         return lecture.getEndTime() - lecture.getStartTime();
     }
 
     @Override
     public void exitState(TumCharacter character) {
-        character.attendNextLecture();
+        TumUtilities.printStateAccessDetails(character,false);
     }
 }
 

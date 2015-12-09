@@ -1,14 +1,12 @@
 package tum_model;
 
-import core.SimScenario;
 import movement.Path;
 import movement.TumCharacter;
 
 /**
- * Created by rober on 11-Nov-15.
+ * Created by lorenzodonini on 09/12/15.
  */
-public class LeaveSimulationAreaState implements IState {
-
+public class TravelState implements IState {
     @Override
     public void enterState(TumCharacter character) {
         TumUtilities.printStateAccessDetails(character,true);
@@ -16,17 +14,12 @@ public class LeaveSimulationAreaState implements IState {
 
     @Override
     public Path getPathForCharacter(TumCharacter character) {
-
-        Path path = new Path(character.getDefaultSpeed());
-        path.addWaypoint(character.getLastLocation());
-        path.addWaypoint(character.getUsedEntry());
-        path.addWaypoint(character.getInitialLocation());
-        return path;
+        return null;
     }
 
     @Override
     public double getPauseTimeForCharacter(TumCharacter character) {
-        return SimScenario.getInstance().getEndTime();
+        return character.getEnterTime();
     }
 
     @Override

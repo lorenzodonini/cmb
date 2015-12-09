@@ -11,16 +11,28 @@ public class MainHallState implements IState {
     private Coord upperLeftCorner;
     private Coord lowerRightCorner;
     private Random randomGenerator;
+    private double minEatTime;
+    private double minGroupStudyTime;
+    private double preparationTimeBeforeLecture;
 
     private static final String SETTINGS_UPPER_LEFT = "hallUpperLeft";
     private static final String SETTINGS_SIZE = "hallSize";
     private static final String SCENARIO_NAMESPACE = "Scenario";
+    private static final String STATES_NAMESPACE = "States";
+    private static final String SETTINGS_EAT_MIN_PERIOD = "minEatTime";
+    private static final String SETTINGS_GROUP_STUDY_MIN_PERIOD = "minGroupStudyTime";
+    private static final String SETTINGS_PREPARATION_LECTURE_TIME = "preparationTimeBeforeLecture";
 
     //DEFAULT CTOR
     public MainHallState(final Settings settings) {
         settings.setNameSpace(SCENARIO_NAMESPACE);
         double [] upperLeft = settings.getCsvDoubles(SETTINGS_UPPER_LEFT);
         double [] size = settings.getCsvDoubles(SETTINGS_SIZE);
+        settings.restoreNameSpace();
+        settings.setNameSpace(STATES_NAMESPACE);
+        minEatTime = settings.getDouble(SETTINGS_EAT_MIN_PERIOD);
+        minGroupStudyTime = settings.getDouble(SETTINGS_GROUP_STUDY_MIN_PERIOD);
+        preparationTimeBeforeLecture = settings.getDouble(SETTINGS_PREPARATION_LECTURE_TIME);
         settings.restoreNameSpace();
 
         //Defining a size for the main hall
@@ -31,7 +43,10 @@ public class MainHallState implements IState {
 
     @Override
     public void enterState(TumCharacter character) {
-        //Do nothing here
+        TumUtilities.printStateAccessDetails(character,true);
+        if (character.getCurrentAction() == TumAction.EAT) {
+            character.setEaten(true);
+        }
     }
 
     public Path getPathForCharacter(TumCharacter character) {
@@ -41,44 +56,54 @@ public class MainHallState implements IState {
         p.addWaypoint(character.getLastLocation());
 
         do {
-            coord = new Coord(randomGenerator.nextDouble() * lowerRightCorner.getX(), randomGenerator.nextDouble() * lowerRightCorner.getY());
+            coord = new Coord(randomGenerator.nextDouble() * lowerRightCorner.getX(),
+                    randomGenerator.nextDouble() * lowerRightCorner.getY());
         } while (!FmiBuilding.getInstance().isInMainHall(coord));
         p.addWaypoint(coord);
         return p;
     }
 
     public double getPauseTimeForCharacter(TumCharacter character) {
-        double minutes = 0;
-        double time = character.getTimeUntilNextLecture();
-        if (time <= 0) {
-            time = 0;
-        }
-        else {
-            time = Math.max(time - 5*60, 0);
+        double maxAvailableTime = character.getTimeUntilNextLecture() - preparationTimeBeforeLecture;
+        double actionTime;
+        if (maxAvailableTime <= 0) {
+            return maxAvailableTime;
         }
         switch (character.getCurrentAction()) {
             case EAT:
-                minutes = 15;
+                actionTime = generateActionTime(minEatTime, maxAvailableTime);
                 break;
             case INDIVIDUAL_STUDY:
-                minutes = 30;
+                actionTime = generateActionTime(0, maxAvailableTime);
                 break;
             case GROUP_STUDY:
-                minutes = 20;
+                actionTime = generateActionTime(minGroupStudyTime, maxAvailableTime);
                 break;
             case SOCIAL:
-                minutes = 5;
+                actionTime = generateActionTime(0, maxAvailableTime);
                 break;
             default:
-                minutes = 0;
+                actionTime = 0;
                 break;
         }
-        return Math.min(minutes * 60, time);
+        return actionTime;
+    }
+
+    private double generateActionTime(double minTime, double maxTime) {
+        //Because of movement time, we might have minTime > maxTime
+        if (minTime > maxTime) {
+            return maxTime;
+        }
+        double time;
+        do {
+            time = randomGenerator.nextDouble() * maxTime;
+        } while (time + minTime > maxTime);
+        return time;
     }
 
     @Override
     public void exitState(TumCharacter character) {
-        //Do nothing here
+        TumUtilities.printStateAccessDetails(character,false);
     }
 }
 

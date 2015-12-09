@@ -5,6 +5,7 @@ import core.SimClock;
 import tum_model.FmiBuilding;
 import tum_model.Lecture;
 import tum_model.StateGenerator;
+import tum_model.TumUtilities;
 
 import java.util.Queue;
 
@@ -13,6 +14,7 @@ import java.util.Queue;
  */
 public class TumStudentMovement extends TumCharacter {
     private Queue<Lecture> registeredLectures;
+    private Lecture currentLecture;
 
     public TumStudentMovement(final Settings settings) {
         super(settings);
@@ -27,6 +29,21 @@ public class TumStudentMovement extends TumCharacter {
     public TumStudentMovement(final TumCharacter other) {
         super(other);
         registeredLectures = FmiBuilding.getInstance().getRandomLectureSchedule(this);
+        enterTime = generateEnterTime();
+        lastBathroomVisitTime = enterTime;
+    }
+
+    private double generateEnterTime() {
+        double start = FmiBuilding.getInstance().getBuildingSettingByName(FmiBuilding.SETTINGS_LECTURE_START);
+        if (hasOtherScheduledLectures()) {
+            Lecture firstLecture = getNextScheduledLecture();
+            double random = rng.nextDouble() * TumUtilities.getInstance().getTimeSlot();
+            return firstLecture.getStartTime() - (prepTimeBeforeLecture + random);
+        }
+        else {
+            double random = rng.nextDouble() * TumUtilities.getInstance().getTimeSlot();
+            return start + random;
+        }
     }
 
     @Override
@@ -51,8 +68,13 @@ public class TumStudentMovement extends TumCharacter {
     }
 
     @Override
+    public Lecture getCurrentLecture() {
+        return currentLecture;
+    }
+
+    @Override
     public void attendNextLecture() {
-        registeredLectures.poll();
+        currentLecture = registeredLectures.poll();
     }
 
     @Override

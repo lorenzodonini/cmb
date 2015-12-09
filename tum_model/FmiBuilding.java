@@ -33,15 +33,24 @@ public final class FmiBuilding {
     private double lectureStartTime;
     private double lectureDuration;
     private double lectureEndTime;
-    private double timeSlot;
+    private int mMaxLecturePerDay;
     private static FmiBuilding mInstance;
     private Random mRandom;
 
     private static final String BUILDING_NAMESPACE = "Building";
-    private static final String SETTINGS_LECTURE_START = "lectureStartTime";
-    private static final String SETTINGS_LECTURE_DURATION = "lectureDuration";
-    private static final String SETTINGS_LECTURE_END = "lectureEndTime";
-    private static final String SETTINGS_TIME_SLOT = "timeSlot";
+    public static final String SETTINGS_LECTURE_START = "lectureStartTime";
+    public static final String SETTINGS_LECTURE_DURATION = "lectureDuration";
+    public static final String SETTINGS_LECTURE_END = "lectureEndTime";
+    public static final String SETTINGS_MAX_LECTURES = "maxLecturesPerDay";
+    public static final String SETTINGS_PROB_ATTENDING_NEXT = "probAttendingNextLecture";
+    public static final String SETTINGS_PROB_ATTENDING_HIGH_POP = "probAttendingHighPopLecture";
+    public static final String SETTINGS_PROB_ATTENDING_MED_POP = "probAttendingMedPopLecture";
+    public static final String SETTINGS_PROB_ONE_HOUR_LECTURE = "probOneHourLecture";
+    public static final String SETTINGS_PROB_TWO_HOUR_LECTURE = "probTwoHourLecture";
+    public static final String SETTINGS_PROB_THREE_HOUR_LECTURE = "probThreeHourLecture";
+
+    //Probability settings
+    private Map<String, Double> mBuildingSettings;
 
     public static FmiBuilding getInstance() {
         if (mInstance == null) {
@@ -93,6 +102,8 @@ public final class FmiBuilding {
         for(Coord spawnArea : spawnAreas) {
             transformToOrigin(spawnArea);
         }
+
+        mBuildingSettings = new HashMap<>();
     }
 
     public boolean isInitialized() {
@@ -101,13 +112,24 @@ public final class FmiBuilding {
 
     public void initializeFmiBuilding(final Settings settings) {
         settings.setNameSpace(BUILDING_NAMESPACE);
+
         lectureStartTime = settings.getDouble(SETTINGS_LECTURE_START);
+        mBuildingSettings.put(SETTINGS_LECTURE_START, lectureStartTime);
         lectureDuration = settings.getDouble(SETTINGS_LECTURE_DURATION);
         lectureEndTime = settings.getDouble(SETTINGS_LECTURE_END);
-        timeSlot = settings.getDouble(SETTINGS_TIME_SLOT);
+        mMaxLecturePerDay = settings.getInt(SETTINGS_MAX_LECTURES);
+        //Getting probabilities
+        mBuildingSettings.put(SETTINGS_PROB_ATTENDING_NEXT, settings.getDouble(SETTINGS_PROB_ATTENDING_NEXT));
+        mBuildingSettings.put(SETTINGS_PROB_ATTENDING_HIGH_POP, settings.getDouble(SETTINGS_PROB_ATTENDING_HIGH_POP));
+        mBuildingSettings.put(SETTINGS_PROB_ATTENDING_MED_POP, settings.getDouble(SETTINGS_PROB_ATTENDING_MED_POP));
+        mBuildingSettings.put(SETTINGS_PROB_ONE_HOUR_LECTURE, settings.getDouble(SETTINGS_PROB_ONE_HOUR_LECTURE));
+        mBuildingSettings.put(SETTINGS_PROB_TWO_HOUR_LECTURE, settings.getDouble(SETTINGS_PROB_TWO_HOUR_LECTURE));
+        mBuildingSettings.put(SETTINGS_PROB_THREE_HOUR_LECTURE, settings.getDouble(SETTINGS_PROB_THREE_HOUR_LECTURE));
+
         settings.restoreNameSpace();
 
         //We build an array. Each element is a time slot, based on the time unit (e.g. 1h)
+        double timeSlot = TumUtilities.getInstance().getTimeSlot();
         int nSlots = (int) ((lectureEndTime - lectureStartTime) / timeSlot);
         timeSlots = new TimeSlot[nSlots];
         for (int i = 0; i < timeSlots.length; i++) {
@@ -121,6 +143,8 @@ public final class FmiBuilding {
 
     private void generateRooms() {
         rooms = new ArrayList<>();
+        double timeSlot = TumUtilities.getInstance().getTimeSlot();
+
         //CREATING SOME STATIC ROOMS
 
         //HOERSAAL 1
@@ -151,58 +175,60 @@ public final class FmiBuilding {
     }
 
     private void sortPlannedLectures(List<Lecture> lectures) {
+        double timeSlot = TumUtilities.getInstance().getTimeSlot();
         for (Lecture l : lectures) {
             int start = (int) ((l.getStartTime() - lectureStartTime) / timeSlot);
             timeSlots[start].addLecture(l);
         }
     }
 
+    public Double getBuildingSettingByName(String name) {
+        return mBuildingSettings.get(name);
+    }
+
     public Queue<Lecture> getRandomLectureSchedule(TumCharacter character) {
-        double prob = 0;
-        double probAttending = 0.75;
-        double probPopHigh = 0.45;
-        double probPopMed = 0.15;
-        Lecture lecture = null;
+        double prob;
+        double probAttending = mBuildingSettings.get(SETTINGS_PROB_ATTENDING_NEXT);
+        double probPopHigh = mBuildingSettings.get(SETTINGS_PROB_ATTENDING_HIGH_POP);
+        double probPopMed = mBuildingSettings.get(SETTINGS_PROB_ATTENDING_MED_POP);
+        /* A student is scheduled to attend between 1 lecture and N lectures, specified in the settings.
+        Since each student chooses to attend a lecture based on a random factor either way, this
+        variable only represents a maximum threshold. A student may still attend 0 lectures (unlikely though).
+         */
+        int numOfLectures = mRandom.nextInt(mMaxLecturePerDay) + 1;
+        Lecture lecture;
         Queue<Lecture> lectures = new LinkedList<>();
-        int i = 0;
-        while (i < timeSlots.length) {
+        int i = 0, j = 0;
+        while (i < timeSlots.length && j < numOfLectures) {
             prob = mRandom.nextDouble();
+            //We will try to attend a lecture in this time slot
             if (prob <= probAttending) {
-                //We will attend a lecture in this time slot
-                boolean bFound = false;
                 //We could get classes which are already full. Gonna try multiple times, until I get a good one.
                 prob = mRandom.nextDouble();
-                if (prob >= probPopHigh) {
+                if (prob <= probPopMed) {
+                    //Attending lecture with medium popularity
+                    lecture = timeSlots[i].getRandomLectureByPopularity(Lecture.POPULARITY_MEDIUM);
+                } else if (prob <= probPopMed + probPopHigh) {
                     //Attending a lecture with high popularity
                     lecture = timeSlots[i].getRandomLectureByPopularity(Lecture.POPULARITY_HIGH);
-                    if (lecture != null) {
-                        bFound = true;
-                    }
-                }
-                //BROKEN LOGIC! OPTIMISE IT
-                if (prob >= probPopMed || !bFound) {
-                    //Attending a lecture with medium popularity
-                    lecture = timeSlots[i].getRandomLectureByPopularity(Lecture.POPULARITY_MEDIUM);
-                    if (lecture != null) {
-                        bFound = true;
-                    }
-                }
-                if (prob < probPopMed || !bFound) {
+                } else {
+                    //Attending a lecture with low popularity {
                     lecture = timeSlots[i].getRandomLectureByPopularity(Lecture.POPULARITY_LOW);
                 }
                 if (lecture == null) {
+                    //There might not be any lecture available in this time slot
                     i++; //Gonna check next time slot
                     continue;
                 }
                 if (lecture.getAvailableSpots() > 0) {
-                    bFound = true;
                     //Incrementing by the amount of slots taken by this lecture, since I'll be busy in that time.
                     i += lecture.getTimeSlots();
                     lecture.register(character);
                     lectures.add(lecture);
+                    j++;
                 }
-
-            } else {
+            }
+            else {
                 i++; //Gonna check next time slot again
             }
         }
@@ -228,7 +254,6 @@ public final class FmiBuilding {
     {
         int index = mRandom.nextInt(3);
         return spawnAreas[index];
-
     }
 
     public Coord makeCoord(double x, double y)
@@ -409,7 +434,7 @@ public final class FmiBuilding {
         public TimeSlot(double start, double end) {
             startTime = start;
             endTime = end;
-            plannedLectures = new HashMap<>(3); //TODO: STATIC! BEWARE
+            plannedLectures = new HashMap<>(3);
             plannedLectures.put(Lecture.POPULARITY_LOW, new ArrayList<Lecture>());
             plannedLectures.put(Lecture.POPULARITY_MEDIUM, new ArrayList<Lecture>());
             plannedLectures.put(Lecture.POPULARITY_HIGH, new ArrayList<Lecture>());

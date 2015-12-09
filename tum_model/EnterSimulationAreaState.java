@@ -1,6 +1,7 @@
 package tum_model;
 
 import core.Coord;
+import core.SimClock;
 import movement.Path;
 import movement.TumCharacter;
 
@@ -13,7 +14,7 @@ public class EnterSimulationAreaState implements IState {
 
     @Override
     public void enterState(TumCharacter character) {
-
+        TumUtilities.printStateAccessDetails(character,true);
     }
 
     @Override
@@ -38,6 +39,9 @@ public class EnterSimulationAreaState implements IState {
 
     @Override
     public void exitState(TumCharacter character) {
-
+        //Setting some post-coditions
+        character.setLastBathroomVisitTime(SimClock.getTime());
+        character.setEaten(false);
+        TumUtilities.printStateAccessDetails(character,false);
     }
 }
