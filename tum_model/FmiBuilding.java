@@ -23,6 +23,7 @@ public final class FmiBuilding {
     private double stretch;
     private List<Coord> buildingPoints;
     private List<List<Coord>> fingers;
+    private List<List<Coord>> fingerEntrys;
     private List<Coord> libraryPoints;
     private List<Coord> hs1Points;
 
@@ -123,33 +124,27 @@ public final class FmiBuilding {
         //CREATING SOME STATIC ROOMS
 
         //HOERSAAL 1
-        LectureRoom hoersaal1 = new LectureRoom(new Coord(800, 200), 500);
+        LectureRoom hoersaal1 = new LectureRoom(makeCoord(11.669152826070786, 48.26245719273224), 500);
         hoersaal1.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
         System.out.println("Hoersaal 1:");
         hoersaal1.printLectures();
         sortPlannedLectures(hoersaal1.getLectures());
         rooms.add(hoersaal1);
-        //HOERSAAL 2
-        LectureRoom hoersaal2 = new LectureRoom(new Coord(800, 300), 200);
-        hoersaal2.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
-        System.out.println("Hoersaal 2:");
-        hoersaal2.printLectures();
-        sortPlannedLectures(hoersaal2.getLectures());
-        rooms.add(hoersaal2);
-        //SEMINAR ROOM 1
-        LectureRoom seminar1 = new LectureRoom(new Coord(800, 400), 50);
-        seminar1.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
+
+        // FINGER 12 ROOMs
+        LectureRoom finger12_0 = new LectureRoom(makeCoord(11.666809916496277, 48.26326588119276), 50);
+        finger12_0.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
         System.out.println("Seminar 1:");
-        seminar1.printLectures();
-        sortPlannedLectures(seminar1.getLectures());
-        rooms.add(seminar1);
-        //SEMINAR ROOM 2
-        LectureRoom seminar2 = new LectureRoom(new Coord(800, 500), 30);
-        seminar2.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
+        finger12_0.printLectures();
+        sortPlannedLectures(finger12_0.getLectures());
+        rooms.add(finger12_0);
+
+        LectureRoom finger12_1 = new LectureRoom(makeCoord(11.666863560676575, 48.26311232190403), 30);
+        finger12_1.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
         System.out.println("Seminar 2:");
-        seminar2.printLectures();
-        sortPlannedLectures(seminar2.getLectures());
-        rooms.add(seminar2);
+        finger12_1.printLectures();
+        sortPlannedLectures(finger12_1.getLectures());
+        rooms.add(finger12_1);
     }
 
     private void sortPlannedLectures(List<Lecture> lectures) {
@@ -233,6 +228,13 @@ public final class FmiBuilding {
 
     }
 
+    public Coord makeCoord(double x, double y)
+    {
+        Coord location = new Coord(x, y);
+        transformToOrigin(location);
+        return location;
+    }
+
     public boolean isInside(Coord pos) {
         return isInside(buildingPoints, pos);
     }
@@ -292,6 +294,27 @@ public final class FmiBuilding {
         }
 
         return true;
+    }
+
+    public List<Coord> getEntryPath(Coord pos)
+    {
+        for(int i = 0; i <= 12; ++i) {
+            if(isInFinger(i, pos)) {
+                return fingerEntrys.get(i);
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    public List<Coord> getExitPath(Coord pos)
+    {
+        List<Coord> entryPath = getEntryPath(pos);
+        List<Coord> exitPath = new ArrayList<>();
+        for(int i = entryPath.size() - 1; i >= 0; --i) {
+            exitPath.add(entryPath.get(i));
+        }
+
+        return exitPath;
     }
 
     public SimMap getMap()
@@ -415,14 +438,16 @@ public final class FmiBuilding {
     private void readFingers() {
 
         fingers = new ArrayList<>();
+        fingerEntrys = new ArrayList<>();
 
         WKTReader reader = new WKTReader();
 
         for(int i = 0; i <= 12; ++i) {
+            // read finger boundary
             String fileName = "finger" + Integer.toString(i) + ".wkt";
-            File buildingFile = new File("data/" + fileName);
+            File fingerFile = new File("data/" + fileName);
             try {
-                List<Coord> finger = reader.readPoints(buildingFile);
+                List<Coord> finger = reader.readPoints(fingerFile);
                 for(Coord point : finger) {
                     transformToOrigin(point);
                 }
@@ -430,6 +455,20 @@ public final class FmiBuilding {
             } catch (IOException e) {
                 List<Coord> empty = new ArrayList<>();
                 fingers.add(empty);
+            }
+
+            // read finger entry path
+            fileName = "finger" + Integer.toString(i) + "_entry.wkt";
+            File entryFile = new File("data/" + fileName);
+            try {
+                List<Coord> entry = reader.readPoints(entryFile);
+                for(Coord point : entry) {
+                    transformToOrigin(point);
+                }
+                fingerEntrys.add(entry);
+            } catch (IOException e) {
+                List<Coord> empty = new ArrayList<>();
+                fingerEntrys.add(empty);
             }
         }
     }
