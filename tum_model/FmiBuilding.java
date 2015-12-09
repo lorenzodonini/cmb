@@ -126,25 +126,28 @@ public final class FmiBuilding {
         //HOERSAAL 1
         LectureRoom hoersaal1 = new LectureRoom(makeCoord(11.669152826070786, 48.26245719273224), 500);
         hoersaal1.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
-        System.out.println("Hoersaal 1:");
-        hoersaal1.printLectures();
         sortPlannedLectures(hoersaal1.getLectures());
         rooms.add(hoersaal1);
 
-        // FINGER 12 ROOMs
-        LectureRoom finger12_0 = new LectureRoom(makeCoord(11.666809916496277, 48.26326588119276), 50);
-        finger12_0.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
-        System.out.println("Seminar 1:");
-        finger12_0.printLectures();
-        sortPlannedLectures(finger12_0.getLectures());
-        rooms.add(finger12_0);
 
-        LectureRoom finger12_1 = new LectureRoom(makeCoord(11.666863560676575, 48.26311232190403), 30);
-        finger12_1.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
-        System.out.println("Seminar 2:");
-        finger12_1.printLectures();
-        sortPlannedLectures(finger12_1.getLectures());
-        rooms.add(finger12_1);
+        // read seminar rooms from file
+        WKTReader reader = new WKTReader();
+        String fileName = "seminar_rooms.wkt";
+        File fingerFile = new File("data/" + fileName);
+
+        try {
+            List<Coord> seminarRooms = reader.readPoints(fingerFile);
+            for(Coord location : seminarRooms) {
+                transformToOrigin(location);
+                int capacity = mRandom.nextInt(26) + 25;
+                LectureRoom seminarRoom = new LectureRoom(location, capacity);
+                seminarRoom.generateLectures(mRandom, lectureStartTime, lectureDuration, lectureEndTime, timeSlot);
+                sortPlannedLectures(seminarRoom.getLectures());
+                rooms.add(seminarRoom);
+            }
+        } catch (IOException e) {
+            System.out.println("failed to read seminar rooms");
+        }
     }
 
     private void sortPlannedLectures(List<Lecture> lectures) {
