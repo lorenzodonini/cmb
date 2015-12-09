@@ -23,6 +23,8 @@ public final class FmiBuilding {
     private double stretch;
     private List<Coord> buildingPoints;
     private List<List<Coord>> fingers;
+    private List<Coord> libraryPoints;
+    private List<Coord> hs1Points;
 
     private TimeSlot[] timeSlots;
     private List<LectureRoom> rooms;
@@ -72,6 +74,8 @@ public final class FmiBuilding {
         }
 
         readFingers();
+        readLibrary();
+        readHs1();
 
         entrances = new Coord[3];
         entrances[0] = new Coord(11.66870892047882, 48.26251843315072);
@@ -259,6 +263,14 @@ public final class FmiBuilding {
         return isInside(fingers.get(finger), pos);
     }
 
+    public boolean isInLibrary(Coord pos) {
+        return isInside(libraryPoints, pos);
+    }
+
+    public boolean isInHs1(Coord pos) {
+        return isInside(hs1Points, pos);
+    }
+
     public boolean isInMainHall(Coord pos)
     {
         if(!isInside(pos)) {
@@ -269,6 +281,14 @@ public final class FmiBuilding {
             if(isInFinger(i, pos)) {
                 return false;
             }
+        }
+
+        if(isInLibrary(pos)) {
+            return false;
+        }
+
+        if(isInHs1(pos)) {
+            return false;
         }
 
         return true;
@@ -412,6 +432,33 @@ public final class FmiBuilding {
                 fingers.add(empty);
             }
         }
+    }
 
+    private void readLibrary() {
+        WKTReader reader = new WKTReader();
+        String fileName = "library.wkt";
+        File file = new File("data/" + fileName);
+        try {
+            libraryPoints = reader.readPoints(file);
+            for(Coord point : libraryPoints) {
+                transformToOrigin(point);
+            }
+        } catch (IOException e) {
+            libraryPoints = new ArrayList<>();
+        }
+    }
+
+    private void readHs1() {
+        WKTReader reader = new WKTReader();
+        String fileName = "hs1.wkt";
+        File file = new File("data/" + fileName);
+        try {
+            hs1Points = reader.readPoints(file);
+            for(Coord point : hs1Points) {
+                transformToOrigin(point);
+            }
+        } catch (IOException e) {
+            hs1Points = new ArrayList<>();
+        }
     }
 }
