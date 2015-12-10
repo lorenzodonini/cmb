@@ -24,6 +24,7 @@ public class StateGenerator {
     private double minEatPeriod;
     private double minGroupStudyTime;
     private double minIndividualStudyTime;
+    private double minLibraryTime;
     private double bathroomTime;
 
     private static final String STATES_NAMESPACE = "States";
@@ -33,8 +34,6 @@ public class StateGenerator {
     private static final String SETTINGS_EATING_PROBABILITY = "eatingProbability";
     private static final String SETTINGS_EAT_MIN_TIME = "minEatTime";
     private static final String SETTINGS_BATHROOM_TIME = "bathroomStayTime";
-    private static final String SETTINGS_GROUP_STUDY_MIN_TIME = "minGroupStudyTime";
-    private static final String SETTINGS_INDIVIDUAL_STUDY_MIN_TIME = "minIndividualStudyTime";
 
     public static StateGenerator getInstance() {
         return ourInstance;
@@ -53,8 +52,12 @@ public class StateGenerator {
         eatingProbability = settings.getDouble(SETTINGS_EATING_PROBABILITY);
         eatingPeriod = settings.getCsvRanges(SETTINGS_EATING_PERIOD)[0];
         minEatPeriod = settings.getDouble(SETTINGS_EAT_MIN_TIME);
-        minGroupStudyTime = settings.getDouble(SETTINGS_GROUP_STUDY_MIN_TIME);
-        minIndividualStudyTime = settings.getDouble(SETTINGS_INDIVIDUAL_STUDY_MIN_TIME);
+        //TODO: CHANGE CLASS
+        minGroupStudyTime =
+                TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_GROUP_STUDY_MIN_TIME);
+        minIndividualStudyTime =
+                TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_INDIVIDUAL_STUDY_MIN_TIME);
+        minLibraryTime = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_LIBRARY_MIN_STAY);
         bathroomTime = settings.getDouble(SETTINGS_BATHROOM_TIME);
         settings.restoreNameSpace();
 
@@ -67,6 +70,11 @@ public class StateGenerator {
         availableStates.put(TumAction.INDIVIDUAL_STUDY, commonState);
         keyList.add(TumAction.SOCIAL);
         availableStates.put(TumAction.SOCIAL, commonState);
+
+        //Library
+        IState libraryState = new LibraryState();
+        keyList.add(TumAction.LIBRARY);
+        availableStates.put(TumAction.LIBRARY, libraryState);
 
         //Bathroom
         IState bathroomState = new BathroomState();
@@ -165,6 +173,9 @@ public class StateGenerator {
             }
             else if (action == TumAction.INDIVIDUAL_STUDY) {
                 timeNeeded = minIndividualStudyTime;
+            }
+            else if (action == TumAction.LIBRARY) {
+                timeNeeded = minLibraryTime;
             }
             else {
                 timeNeeded = 0;

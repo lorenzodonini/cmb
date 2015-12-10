@@ -61,3 +61,4 @@ States.minGroupPeople = 2
 States.maxGroupPeople = 6
 States.minIndividualStudyTime = 900
 States.peoplePerSocialGroupMax = 4
+States.minLibraryStay = 600

@@ -50,6 +50,7 @@ public class TumModelSettings {
     public static final String TUM_GROUP_MAX_PEOPLE = "maxGroupPeople";
     public static final String TUM_INDIVIDUAL_STUDY_MIN_TIME = "minIndividualStudyTime";
     public static final String TUM_MAX_SOCIAL_MEETING_PEOPLE = "peoplePerSocialGroupMax";
+    public static final String TUM_LIBRARY_MIN_STAY = "minLibraryStay";
 
     private Map<String, Double> mDoubleProperties;
     private Map<String, Range> mRangeProperties;
@@ -96,6 +97,7 @@ public class TumModelSettings {
         loadIntegerSetting(settings,TUM_GROUP_MAX_PEOPLE);
         loadDoubleSetting(settings,TUM_INDIVIDUAL_STUDY_MIN_TIME);
         loadIntegerSetting(settings,TUM_MAX_SOCIAL_MEETING_PEOPLE);
+        loadDoubleSetting(settings,TUM_LIBRARY_MIN_STAY);
     }
 
     private void loadDoubleSetting(Settings settings, String name) {

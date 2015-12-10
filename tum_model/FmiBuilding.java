@@ -25,6 +25,7 @@ public final class FmiBuilding {
     private List<List<Coord>> fingers;
     private List<List<Coord>> fingerEntrys;
     private List<Coord> libraryPoints;
+    private List<Coord> libraryEntryPath;
     private List<Coord> hs1Points;
 
     private TimeSlot[] timeSlots;
@@ -340,6 +341,10 @@ public final class FmiBuilding {
         return exitPath;
     }
 
+    public List<Coord> getLibraryEntryPath() {
+        return libraryEntryPath;
+    }
+
     public SimMap getMap()
     {
         Map<Coord, MapNode> nodeDict = new HashMap<>();
@@ -471,13 +476,10 @@ public final class FmiBuilding {
             File fingerFile = new File("data/" + fileName);
             try {
                 List<Coord> finger = reader.readPoints(fingerFile);
-                for(Coord point : finger) {
-                    transformToOrigin(point);
-                }
+                transformReadPoints(finger);
                 fingers.add(finger);
             } catch (IOException e) {
-                List<Coord> empty = new ArrayList<>();
-                fingers.add(empty);
+                fingers.add(new ArrayList<Coord>());
             }
 
             // read finger entry path
@@ -485,13 +487,10 @@ public final class FmiBuilding {
             File entryFile = new File("data/" + fileName);
             try {
                 List<Coord> entry = reader.readPoints(entryFile);
-                for(Coord point : entry) {
-                    transformToOrigin(point);
-                }
+                transformReadPoints(entry);
                 fingerEntrys.add(entry);
             } catch (IOException e) {
-                List<Coord> empty = new ArrayList<>();
-                fingerEntrys.add(empty);
+                fingerEntrys.add(new ArrayList<Coord>());
             }
         }
     }
@@ -502,11 +501,18 @@ public final class FmiBuilding {
         File file = new File("data/" + fileName);
         try {
             libraryPoints = reader.readPoints(file);
-            for(Coord point : libraryPoints) {
-                transformToOrigin(point);
-            }
+            transformReadPoints(libraryPoints);
         } catch (IOException e) {
             libraryPoints = new ArrayList<>();
+        }
+        fileName = "library_entry.wkt";
+        file = new File("data/" + fileName);
+        try {
+            libraryEntryPath = reader.readPoints(file);
+            transformReadPoints(libraryEntryPath);
+        }
+        catch (IOException e) {
+            libraryEntryPath = new ArrayList<>();
         }
     }
 
@@ -516,11 +522,15 @@ public final class FmiBuilding {
         File file = new File("data/" + fileName);
         try {
             hs1Points = reader.readPoints(file);
-            for(Coord point : hs1Points) {
-                transformToOrigin(point);
-            }
+            transformReadPoints(hs1Points);
         } catch (IOException e) {
             hs1Points = new ArrayList<>();
+        }
+    }
+
+    private void transformReadPoints(List<Coord> points) {
+        for (Coord point : points) {
+            transformToOrigin(point);
         }
     }
 }

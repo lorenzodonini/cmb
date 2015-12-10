@@ -72,7 +72,7 @@ public class MainHallState implements IState {
         double maxAvailableTime = character.getTimeUntilNextLecture() - preparationTimeBeforeLecture;
         double actionTime;
         if (maxAvailableTime <= 0) {
-            return maxAvailableTime;
+            return 0;
         }
         switch (character.getCurrentAction()) {
             case EAT:
@@ -97,7 +97,7 @@ public class MainHallState implements IState {
     private double generateActionTime(double minTime, double maxTime) {
         //Because of movement time, we might have minTime > maxTime
         if (minTime > maxTime) {
-            return maxTime; //TODO: WORKING?!
+            return maxTime; //Returning the actual minimum
         }
         double time;
         do {
@@ -108,10 +108,10 @@ public class MainHallState implements IState {
 
     @Override
     public void exitState(TumCharacter character) {
-        TumUtilities.printStateAccessDetails(character,false);
         if (character.getCurrentAction() == TumAction.SOCIAL) {
             SocialPool.getInstance().leaveSocialGroup(character);
         }
+        TumUtilities.printStateAccessDetails(character,false);
     }
 }
 

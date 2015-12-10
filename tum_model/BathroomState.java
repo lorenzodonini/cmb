@@ -15,6 +15,7 @@ public class BathroomState implements IState {
 
     public BathroomState() {
         bathroomCoord = FmiBuilding.getInstance().makeCoord(11.668698191642761, 48.26249450894131);
+        bathroomStayDuration = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_BATHROOM_TIME);
     }
 
     @Override
