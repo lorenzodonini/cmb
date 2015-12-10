@@ -13,9 +13,6 @@ import java.util.Random;
 public class LectureRoom {
     private Coord position;
     private int capacity;
-    private double probabilityOneHour;
-    private double probabilityTwoHours;
-    private double probabilityThreeHours;
     private List<Lecture> lectures;
 
     public LectureRoom(Coord pos, int cap)
@@ -42,20 +39,20 @@ public class LectureRoom {
     }
 
     // generates a random list of lectures for this room
-    public void generateLectures(Random random, double lectureStart, double lectureDuration, double lectureEnd, double timeSlot)
+    public void generateLectures(Random random, double lectureStart, double lectureDuration,
+                                 double lectureEnd, double timeSlot)
     {
-        double probOneHour =
-                FmiBuilding.getInstance().getBuildingSettingByName(FmiBuilding.SETTINGS_PROB_ONE_HOUR_LECTURE);
-        double probTwoHour =
-                FmiBuilding.getInstance().getBuildingSettingByName(FmiBuilding.SETTINGS_PROB_TWO_HOUR_LECTURE);
-        double probThreeHour =
-                FmiBuilding.getInstance().getBuildingSettingByName(FmiBuilding.SETTINGS_PROB_THREE_HOUR_LECTURE);
+        double probOneHour = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_PROB_ONE_HOUR_LECTURE);
+        double probTwoHour = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_PROB_TWO_HOUR_LECTURE);
+        double probThreeHour = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_PROB_THREE_HOUR_LECTURE);
+
+        double offset = timeSlot - lectureDuration;
 
         double time = lectureStart;
         while (time < lectureEnd) {
             double result = random.nextDouble();
             if (result <= probOneHour && (lectureEnd - time) > lectureDuration) {
-                double startOffset = random.nextInt(15);
+                double startOffset = random.nextInt((int)offset);
                 double endOffset = 15 - startOffset;
                 Lecture newLecture = new Lecture(time + startOffset, time + lectureDuration + endOffset, 1,this);
                 lectures.add(newLecture);

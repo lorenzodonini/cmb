@@ -23,11 +23,11 @@ public class LectureState implements IState
     @Override
     public Path getPathForCharacter(TumCharacter character) {
         Coord lectureLocation = character.getCurrentLecture().getLectureRoom().getPosition();
-        Coord lastLocation = character.getLastLocation();
-        List<Coord> entryPath = FmiBuilding.getInstance().getEntryPath(lectureLocation);
 
         final Path p = new Path(character.getDefaultSpeed());
-        p.addWaypoint(lastLocation);
+        //Not setting last location. That is handled inside the MovementModel
+
+        List<Coord> entryPath = FmiBuilding.getInstance().getEntryPath(lectureLocation);
         for(Coord point : entryPath) {
             p.addWaypoint(point);
         }
@@ -44,6 +44,9 @@ public class LectureState implements IState
     @Override
     public void exitState(TumCharacter character) {
         TumUtilities.printStateAccessDetails(character,false);
+        Coord lectureLocation = character.getCurrentLecture().getLectureRoom().getPosition();
+        List<Coord> exitPath = FmiBuilding.getInstance().getExitPath(lectureLocation);
+        character.setLastForcedPath(exitPath);
     }
 }
 

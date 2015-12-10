@@ -97,14 +97,19 @@ public class StateGenerator {
         return keyList.get(randomGenerator.nextInt(keyList.size()));
     }
 
-    public void setNextAction(TumCharacter character) {
+    public void changeToNextState(TumCharacter character) {
+        character.exitOldState();
+        character.setCurrentAction(getNextAction(character));
+        character.setNewState(getNextState(character));
+    }
+
+    public TumAction getNextAction(TumCharacter character) {
         if(character.getCurrentAction() == null) {
-            character.setCurrentAction(TumAction.TRAVEL);
-            return;
+            return TumAction.TRAVEL;
         }
         else if(character.getCurrentAction() == TumAction.TRAVEL) {
             character.setCurrentAction(TumAction.ENTER);
-            return;
+            return TumAction.ENTER;
         }
 
         TumAction action;
@@ -127,7 +132,7 @@ public class StateGenerator {
                 action = TumAction.EXIT;
             }
         }
-        character.setCurrentAction(action);
+        return action;
     }
 
     private TumAction generateActionBasedOnNeeds(TumCharacter character) {
@@ -168,14 +173,15 @@ public class StateGenerator {
         return action;
     }
 
-    public void setNextState(TumCharacter character) {
+    public IState getNextState(TumCharacter character) {
         TumAction action = character.getCurrentAction();
         if (action != null) {
             IState nextState = getStateForAction(action);
             if (nextState != null) {
-                character.setNewState(nextState);
+                return nextState;
             }
         }
+        return null;
     }
 }
 

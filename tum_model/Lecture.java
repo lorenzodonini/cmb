@@ -26,11 +26,12 @@ public class Lecture {
         endTime = end;
         timeSlots = slotsTotal;
         lectureRoom = room;
-        //TODO: parametrize this somehow. Settings ftw
-        if (room.getCapacity() > 200) {
+        double highPop = TumModelSettings.getInstance().getInt(TumModelSettings.TUM_HIGH_POPULATION);
+        double medPop = TumModelSettings.getInstance().getInt(TumModelSettings.TUM_MED_POPULATION);
+        if (room.getCapacity() > highPop) {
             mPopularity = POPULARITY_HIGH;
         }
-        else if (room.getCapacity() > 50) {
+        else if (room.getCapacity() > medPop) {
             mPopularity = POPULARITY_MEDIUM;
         }
         else {

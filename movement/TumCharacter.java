@@ -5,6 +5,8 @@ import core.Settings;
 import core.SimClock;
 import tum_model.*;
 
+import java.util.List;
+
 /**
  * Created by lorenzodonini on 10/11/15.
  */
@@ -20,23 +22,15 @@ public abstract class TumCharacter extends MovementModel {
     private TumAction currentAction;
     private Coord usedEntry;
     private Coord initialLocation;
-
-    private static final String STUDENTS_NAMESPACE = "Group1";
-    private static final String SETTINGS_BATHROOM_PROBABILITY = "bathroomTsProbability";
-    private static final String STATES_SCENARIO = "States";
-    private static final String SETTINGS_PREP_TIME_BEFORE_LECTURE = "preparationTimeBeforeLecture";
+    private List<Coord> lastForcedPath;
+    private SocialPool.SocialGroup socialGroup;
 
     //CTOR
     public TumCharacter(final Settings settings) {
         super(settings);
         //Other stuff
-
-        settings.setNameSpace(STUDENTS_NAMESPACE);
-        bathroomProbability = settings.getDouble(SETTINGS_BATHROOM_PROBABILITY);
-        settings.restoreNameSpace();
-        settings.setNameSpace(STATES_SCENARIO);
-        prepTimeBeforeLecture = settings.getDouble(SETTINGS_PREP_TIME_BEFORE_LECTURE);
-        settings.restoreNameSpace();
+        bathroomProbability = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_BATHROOM_PROBABILITY);
+        prepTimeBeforeLecture = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_PREP_BEFORE_LECTURE);
     }
 
     public TumCharacter(final TumCharacter other) {
@@ -56,6 +50,7 @@ public abstract class TumCharacter extends MovementModel {
         lastWaypoint = initialLocation;
         currentAction = null;
         currentState = null;
+        socialGroup = null;
     }
 
     //PUBLIC ACCESSORS
@@ -102,8 +97,25 @@ public abstract class TumCharacter extends MovementModel {
             return 0;
         }
         double timePassed = SimClock.getTime() - lastBathroomVisitTime;
-        int timeSlotsPassed = (int) (timePassed / TumUtilities.getInstance().getTimeSlot());
+        double timeSlot = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_TIME_SLOT);
+        int timeSlotsPassed = (int) (timePassed / timeSlot);
         return bathroomProbability * timeSlotsPassed;
+    }
+
+    public void setLastForcedPath(List<Coord> path) {
+        lastForcedPath = path;
+    }
+
+    public List<Coord> getLastForcedPath() {
+        return lastForcedPath;
+    }
+
+    public void setSocialGroup(SocialPool.SocialGroup group) {
+        socialGroup = group;
+    }
+
+    public SocialPool.SocialGroup getSocialGroup() {
+        return socialGroup;
     }
 
     public void setLastBathroomVisitTime(double visitTime) {
@@ -122,10 +134,13 @@ public abstract class TumCharacter extends MovementModel {
         return currentState;
     }
 
-    public void setNewState(IState state) {
+    public void exitOldState() {
         if (currentState != null) {
             currentState.exitState(this);
         }
+    }
+
+    public void setNewState(IState state) {
         currentState = state;
         currentState.enterState(this);
     }

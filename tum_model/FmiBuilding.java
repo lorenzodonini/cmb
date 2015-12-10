@@ -36,6 +36,7 @@ public final class FmiBuilding {
     private int mMaxLecturePerDay;
     private static FmiBuilding mInstance;
     private Random mRandom;
+    private double timeSlot;
 
     private static final String BUILDING_NAMESPACE = "Building";
     public static final String SETTINGS_LECTURE_START = "lectureStartTime";
@@ -103,6 +104,8 @@ public final class FmiBuilding {
             transformToOrigin(spawnArea);
         }
 
+        timeSlot = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_TIME_SLOT);
+
         mBuildingSettings = new HashMap<>();
     }
 
@@ -129,7 +132,6 @@ public final class FmiBuilding {
         settings.restoreNameSpace();
 
         //We build an array. Each element is a time slot, based on the time unit (e.g. 1h)
-        double timeSlot = TumUtilities.getInstance().getTimeSlot();
         int nSlots = (int) ((lectureEndTime - lectureStartTime) / timeSlot);
         timeSlots = new TimeSlot[nSlots];
         for (int i = 0; i < timeSlots.length; i++) {
@@ -143,8 +145,6 @@ public final class FmiBuilding {
 
     private void generateRooms() {
         rooms = new ArrayList<>();
-        double timeSlot = TumUtilities.getInstance().getTimeSlot();
-
         //CREATING SOME STATIC ROOMS
 
         //HOERSAAL 1
@@ -175,22 +175,17 @@ public final class FmiBuilding {
     }
 
     private void sortPlannedLectures(List<Lecture> lectures) {
-        double timeSlot = TumUtilities.getInstance().getTimeSlot();
         for (Lecture l : lectures) {
             int start = (int) ((l.getStartTime() - lectureStartTime) / timeSlot);
             timeSlots[start].addLecture(l);
         }
     }
 
-    public Double getBuildingSettingByName(String name) {
-        return mBuildingSettings.get(name);
-    }
-
     public Queue<Lecture> getRandomLectureSchedule(TumCharacter character) {
         double prob;
-        double probAttending = mBuildingSettings.get(SETTINGS_PROB_ATTENDING_NEXT);
-        double probPopHigh = mBuildingSettings.get(SETTINGS_PROB_ATTENDING_HIGH_POP);
-        double probPopMed = mBuildingSettings.get(SETTINGS_PROB_ATTENDING_MED_POP);
+        double probAttending = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_PROB_ATTENDING_NEXT);
+        double probPopHigh = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_PROB_ATTENDING_HIGH_POP);
+        double probPopMed = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_PROB_ATTENDING_MED_POP);
         /* A student is scheduled to attend between 1 lecture and N lectures, specified in the settings.
         Since each student chooses to attend a lecture based on a random factor either way, this
         variable only represents a maximum threshold. A student may still attend 0 lectures (unlikely though).

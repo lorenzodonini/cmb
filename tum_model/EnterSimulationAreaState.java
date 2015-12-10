@@ -26,7 +26,6 @@ public class EnterSimulationAreaState implements IState {
         character.setUsedEntry(entryLocation);
 
         Path path = new Path(character.getDefaultSpeed());
-        path.addWaypoint(lastLocation);
         path.addWaypoint(entryLocation);
 
         return path;

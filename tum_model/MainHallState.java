@@ -2,6 +2,7 @@ package tum_model;
 
 import core.Coord;
 import core.Settings;
+import core.SimScenario;
 import movement.Path;
 import movement.TumCharacter;
 
@@ -52,13 +53,17 @@ public class MainHallState implements IState {
     public Path getPathForCharacter(TumCharacter character) {
         final Path p = new Path(character.getDefaultSpeed());
         Coord coord;
-
-        p.addWaypoint(character.getLastLocation());
-
         do {
             coord = new Coord(randomGenerator.nextDouble() * lowerRightCorner.getX(),
                     randomGenerator.nextDouble() * lowerRightCorner.getY());
         } while (!FmiBuilding.getInstance().isInMainHall(coord));
+
+        //If we are meeting some people, we may want to go to a specific location
+        if (character.getCurrentAction() == TumAction.SOCIAL) {
+            SocialPool.SocialGroup group = SocialPool.getInstance().findFriends(character,coord);
+            character.setSocialGroup(group);
+            coord = group.getLocation();
+        }
         p.addWaypoint(coord);
         return p;
     }
@@ -92,7 +97,7 @@ public class MainHallState implements IState {
     private double generateActionTime(double minTime, double maxTime) {
         //Because of movement time, we might have minTime > maxTime
         if (minTime > maxTime) {
-            return maxTime;
+            return maxTime; //TODO: WORKING?!
         }
         double time;
         do {
@@ -104,6 +109,9 @@ public class MainHallState implements IState {
     @Override
     public void exitState(TumCharacter character) {
         TumUtilities.printStateAccessDetails(character,false);
+        if (character.getCurrentAction() == TumAction.SOCIAL) {
+            SocialPool.getInstance().leaveSocialGroup(character);
+        }
     }
 }
 

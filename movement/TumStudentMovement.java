@@ -1,12 +1,12 @@
 package movement;
 
+import core.Coord;
+import core.Message;
 import core.Settings;
 import core.SimClock;
-import tum_model.FmiBuilding;
-import tum_model.Lecture;
-import tum_model.StateGenerator;
-import tum_model.TumUtilities;
+import tum_model.*;
 
+import java.util.List;
 import java.util.Queue;
 
 /**
@@ -34,14 +34,15 @@ public class TumStudentMovement extends TumCharacter {
     }
 
     private double generateEnterTime() {
-        double start = FmiBuilding.getInstance().getBuildingSettingByName(FmiBuilding.SETTINGS_LECTURE_START);
+        double start = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_LECTURE_START);
+        double timeSlot = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_TIME_SLOT);
         if (hasOtherScheduledLectures()) {
             Lecture firstLecture = getNextScheduledLecture();
-            double random = rng.nextDouble() * TumUtilities.getInstance().getTimeSlot();
+            double random = rng.nextDouble() * timeSlot;
             return firstLecture.getStartTime() - (prepTimeBeforeLecture + random);
         }
         else {
-            double random = rng.nextDouble() * TumUtilities.getInstance().getTimeSlot();
+            double random = rng.nextDouble() * timeSlot;
             return start + random;
         }
     }
@@ -82,19 +83,46 @@ public class TumStudentMovement extends TumCharacter {
         if (getCurrentState() != null) {
             return SimClock.getTime() + getCurrentState().getPauseTimeForCharacter(this);
         }
-        //TODO: ONCE WE HAVE A WORKING ENTERING STATE WE NEED TO EDIT THIS
         return super.nextPathAvailable();
     }
 
     @Override
     public Path getPath() {
         //first need to get a new state
-        StateGenerator.getInstance().setNextAction(this);
-        StateGenerator.getInstance().setNextState(this);
-        if (getCurrentState() != null) {
-            return getCurrentState().getPathForCharacter(this);
+        exitOldState();
+        TumAction nextAction = StateGenerator.getInstance().getNextAction(this);
+        setCurrentAction(nextAction);
+        IState nextState = StateGenerator.getInstance().getNextState(this);
+        setNewState(nextState);
+        //StateGenerator.getInstance().changeToNextState(this); //Simple alternative
+
+        //I might need to follow a fixed path on my way out of a location
+        List<Coord> oldPath = getLastForcedPath();
+        final Path p = new Path();
+        p.setSpeed(getDefaultSpeed());
+        p.addWaypoint(getLastLocation());
+        if (oldPath != null) {
+            for (Coord c : oldPath) {
+                p.addWaypoint(c);
+            }
         }
-        return null;
+        setLastForcedPath(null);
+
+        //Now I need to get the actual set of coordinates to follow in order to reach the new location
+        if (getCurrentState() != null) {
+            Path newPath = getCurrentState().getPathForCharacter(this);
+            if (newPath == null) {
+                return p;
+            }
+
+            for (Coord c : newPath.getCoords()) {
+                p.addWaypoint(c);
+            }
+            return p;
+        }
+        else {
+            return null;
+        }
     }
 
     @Override

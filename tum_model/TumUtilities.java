@@ -12,33 +12,27 @@ import util.Range;
 public class TumUtilities {
     private static TumUtilities ourInstance = new TumUtilities();
 
-    private double defaultTimeSlot;
-
-    private final static String SETTINGS_SCENARIO_NAMESPACE = "Scenario";
-    private final static String SETTINGS_TIME_SLOT = "timeSlot";
+    private static boolean bStateChangesReport;
 
     public static TumUtilities getInstance() {
         return ourInstance;
     }
 
     public static void printStateAccessDetails(TumCharacter character, boolean entering) {
+        if (!bStateChangesReport) {
+            return;
+        }
         if (entering) {
             System.out.println(character.getHost().toString() + " entered " + character.getCurrentAction().name());
         }
         else {
-            System.out.println(character.getHost().toString() + " exited " + character.getCurrentState().getClass().getName());
+            System.out.println(character.getHost().toString() + " exited " + character.getCurrentAction().name());
         }
     }
 
     private TumUtilities() {
         //Initializing
-        Settings settings = new Settings();
-        settings.setNameSpace(SETTINGS_SCENARIO_NAMESPACE);
-        defaultTimeSlot = settings.getDouble(SETTINGS_TIME_SLOT);
-    }
-
-    public double getTimeSlot() {
-        return defaultTimeSlot;
+        bStateChangesReport = true;
     }
 
     public static double getRemainingTimeToday() {
