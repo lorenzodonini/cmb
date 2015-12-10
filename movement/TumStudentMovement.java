@@ -38,11 +38,11 @@ public class TumStudentMovement extends TumCharacter {
         double timeSlot = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_TIME_SLOT);
         if (hasOtherScheduledLectures()) {
             Lecture firstLecture = getNextScheduledLecture();
-            double random = rng.nextDouble() * timeSlot;
+            double random = rng.nextDouble() * (timeSlot/2);
             return firstLecture.getStartTime() - (prepTimeBeforeLecture + random);
         }
         else {
-            double random = rng.nextDouble() * timeSlot;
+            double random = rng.nextDouble() * (timeSlot/2);
             return start + random;
         }
     }

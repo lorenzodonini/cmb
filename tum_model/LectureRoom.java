@@ -48,26 +48,34 @@ public class LectureRoom {
 
         double offset = timeSlot - lectureDuration;
 
+        double  minutes1=15*60;
+        double  minutes2=30*60;
+        double  minutes3=45*60;
+
         double time = lectureStart;
         while (time < lectureEnd) {
             double result = random.nextDouble();
             if (result <= probOneHour && (lectureEnd - time) > lectureDuration) {
                 double startOffset = random.nextInt((int)offset);
-                double endOffset = 15 - startOffset;
+                double endOffset_max = minutes1 - startOffset;
+                double endOffset= random.nextDouble()*endOffset_max;
+
                 Lecture newLecture = new Lecture(time + startOffset, time + lectureDuration + endOffset, 1,this);
                 lectures.add(newLecture);
                 time += timeSlot;
             }
             else if (result <= probOneHour+probTwoHour && (lectureEnd - time) > lectureDuration*2 ) {
                 double startOffset = random.nextInt(15);
-                double endOffset = 30 - startOffset + random.nextInt(5);
+                double endOffset_max = minutes2 - startOffset;
+                double endOffset= random.nextDouble()*endOffset_max;
                 Lecture newLecture = new Lecture(time + startOffset, time + lectureDuration*2 + endOffset, 2,this);
                 lectures.add(newLecture);
                 time += timeSlot * 2;
             }
             else if (result <= probOneHour+probTwoHour+probThreeHour && (lectureEnd - time) > lectureDuration*3) {
                 double startOffset = random.nextInt(15);
-                double endOffset = 45 - startOffset + random.nextInt(10);
+                double endOffset_max = minutes3 - startOffset;
+                double endOffset= random.nextDouble()*endOffset_max;
                 Lecture newLecture = new Lecture(time + startOffset, time + lectureDuration*3 + endOffset, 3,this);
                 lectures.add(newLecture);
                 time += timeSlot * 3;
