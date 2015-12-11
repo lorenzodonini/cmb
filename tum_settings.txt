@@ -32,9 +32,11 @@ Group1.movementModel = TumStudentMovement
 Group1.router = PassiveRouter
 
 # Report
-Report.nrofReports = 1
-Report.report1 = SamplingReport
+Report.nrofReports = 2
 Report.reportDir = reports
+Report.report1 = SamplingReport
+Report.report2 = FlightLengthReport
+
 
 # Building
 Building.lectureStartTime = 28800
