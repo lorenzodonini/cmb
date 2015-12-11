@@ -32,7 +32,8 @@ Group1.movementModel = TumStudentMovement
 Group1.router = PassiveRouter
 
 # Report
-Report.nrofReports = 0
+Report.nrofReports = 1
+Report.report1 = SamplingReport
 Report.reportDir = reports
 
 # Building
