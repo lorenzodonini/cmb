@@ -11,9 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * Created by rober on 11-Nov-15.
- */
 public final class FmiBuilding {
 
     private Coord lowerRight;
@@ -23,9 +20,10 @@ public final class FmiBuilding {
     private double stretch;
     private List<Coord> buildingPoints;
     private List<List<Coord>> fingers;
-    private List<List<Coord>> fingerEntrys;
+    private List<List<Coord>> fingerEntries;
     private List<Coord> libraryPoints;
     private List<Coord> libraryEntryPath;
+    private List<Coord> libraryExitPath;
     private List<Coord> hs1Points;
 
     private TimeSlot[] timeSlots;
@@ -38,21 +36,6 @@ public final class FmiBuilding {
     private static FmiBuilding mInstance;
     private Random mRandom;
     private double timeSlot;
-
-    private static final String BUILDING_NAMESPACE = "Building";
-    public static final String SETTINGS_LECTURE_START = "lectureStartTime";
-    public static final String SETTINGS_LECTURE_DURATION = "lectureDuration";
-    public static final String SETTINGS_LECTURE_END = "lectureEndTime";
-    public static final String SETTINGS_MAX_LECTURES = "maxLecturesPerDay";
-    public static final String SETTINGS_PROB_ATTENDING_NEXT = "probAttendingNextLecture";
-    public static final String SETTINGS_PROB_ATTENDING_HIGH_POP = "probAttendingHighPopLecture";
-    public static final String SETTINGS_PROB_ATTENDING_MED_POP = "probAttendingMedPopLecture";
-    public static final String SETTINGS_PROB_ONE_HOUR_LECTURE = "probOneHourLecture";
-    public static final String SETTINGS_PROB_TWO_HOUR_LECTURE = "probTwoHourLecture";
-    public static final String SETTINGS_PROB_THREE_HOUR_LECTURE = "probThreeHourLecture";
-
-    //Probability settings
-    private Map<String, Double> mBuildingSettings;
 
     public static FmiBuilding getInstance() {
         if (mInstance == null) {
@@ -106,8 +89,6 @@ public final class FmiBuilding {
         }
 
         timeSlot = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_TIME_SLOT);
-
-        mBuildingSettings = new HashMap<>();
     }
 
     public boolean isInitialized() {
@@ -115,20 +96,12 @@ public final class FmiBuilding {
     }
 
     public void initializeFmiBuilding(final Settings settings) {
-        settings.setNameSpace(BUILDING_NAMESPACE);
+        TumModelSettings params = TumModelSettings.getInstance();
 
-        lectureStartTime = settings.getDouble(SETTINGS_LECTURE_START);
-        mBuildingSettings.put(SETTINGS_LECTURE_START, lectureStartTime);
-        lectureDuration = settings.getDouble(SETTINGS_LECTURE_DURATION);
-        lectureEndTime = settings.getDouble(SETTINGS_LECTURE_END);
-        mMaxLecturePerDay = settings.getInt(SETTINGS_MAX_LECTURES);
-        //Getting probabilities
-        mBuildingSettings.put(SETTINGS_PROB_ATTENDING_NEXT, settings.getDouble(SETTINGS_PROB_ATTENDING_NEXT));
-        mBuildingSettings.put(SETTINGS_PROB_ATTENDING_HIGH_POP, settings.getDouble(SETTINGS_PROB_ATTENDING_HIGH_POP));
-        mBuildingSettings.put(SETTINGS_PROB_ATTENDING_MED_POP, settings.getDouble(SETTINGS_PROB_ATTENDING_MED_POP));
-        mBuildingSettings.put(SETTINGS_PROB_ONE_HOUR_LECTURE, settings.getDouble(SETTINGS_PROB_ONE_HOUR_LECTURE));
-        mBuildingSettings.put(SETTINGS_PROB_TWO_HOUR_LECTURE, settings.getDouble(SETTINGS_PROB_TWO_HOUR_LECTURE));
-        mBuildingSettings.put(SETTINGS_PROB_THREE_HOUR_LECTURE, settings.getDouble(SETTINGS_PROB_THREE_HOUR_LECTURE));
+        lectureStartTime = params.getDouble(TumModelSettings.TUM_LECTURE_START);
+        lectureDuration = params.getDouble(TumModelSettings.TUM_LECTURE_DURATION);
+        lectureEndTime = params.getDouble(TumModelSettings.TUM_LECTURE_END);
+        mMaxLecturePerDay = params.getInt(TumModelSettings.TUM_MAX_DAILY_LECTURES);
 
         settings.restoreNameSpace();
 
@@ -252,6 +225,10 @@ public final class FmiBuilding {
         return spawnAreas[index];
     }
 
+    public Coord [] getSpawnAreas() {
+        return spawnAreas;
+    }
+
     public Coord makeCoord(double x, double y)
     {
         Coord location = new Coord(x, y);
@@ -324,7 +301,7 @@ public final class FmiBuilding {
     {
         for(int i = 0; i <= 12; ++i) {
             if(isInFinger(i, pos)) {
-                return fingerEntrys.get(i);
+                return fingerEntries.get(i);
             }
         }
         return new ArrayList<>();
@@ -343,6 +320,10 @@ public final class FmiBuilding {
 
     public List<Coord> getLibraryEntryPath() {
         return libraryEntryPath;
+    }
+
+    public List<Coord> getLibraryExitPath() {
+        return libraryExitPath;
     }
 
     public SimMap getMap()
@@ -466,7 +447,7 @@ public final class FmiBuilding {
     private void readFingers() {
 
         fingers = new ArrayList<>();
-        fingerEntrys = new ArrayList<>();
+        fingerEntries = new ArrayList<>();
 
         WKTReader reader = new WKTReader();
 
@@ -488,9 +469,9 @@ public final class FmiBuilding {
             try {
                 List<Coord> entry = reader.readPoints(entryFile);
                 transformReadPoints(entry);
-                fingerEntrys.add(entry);
+                fingerEntries.add(entry);
             } catch (IOException e) {
-                fingerEntrys.add(new ArrayList<Coord>());
+                fingerEntries.add(new ArrayList<Coord>());
             }
         }
     }
@@ -510,6 +491,10 @@ public final class FmiBuilding {
         try {
             libraryEntryPath = reader.readPoints(file);
             transformReadPoints(libraryEntryPath);
+            libraryExitPath = new ArrayList<>(libraryEntryPath.size());
+            for (int i=libraryEntryPath.size() - 1; i>= 0; i--) {
+                libraryExitPath.add(libraryEntryPath.get(i));
+            }
         }
         catch (IOException e) {
             libraryEntryPath = new ArrayList<>();

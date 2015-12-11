@@ -7,9 +7,6 @@ import movement.TumCharacter;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Created by lorenzodonini on 10/12/15.
- */
 public class LibraryState implements IState {
     private Coord libraryCoord;
     private double minLibraryStay;
@@ -44,7 +41,7 @@ public class LibraryState implements IState {
     @Override
     public double getPauseTimeForCharacter(TumCharacter character) {
         double maxAvailableTime = character.getTimeUntilNextLecture() - preparationTimeBeforeLecture;
-        if (maxAvailableTime < minLibraryStay) {
+        if (maxAvailableTime <= minLibraryStay) {
             return maxAvailableTime;
         }
         double time;
@@ -57,5 +54,7 @@ public class LibraryState implements IState {
     @Override
     public void exitState(TumCharacter character) {
         TumUtilities.printStateAccessDetails(character,false);
+        List<Coord> exitPath = FmiBuilding.getInstance().getLibraryExitPath();
+        character.setLastForcedPath(exitPath);
     }
 }

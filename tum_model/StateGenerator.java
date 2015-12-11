@@ -3,13 +3,11 @@ package tum_model;
 import core.Settings;
 import core.SimClock;
 import movement.TumCharacter;
+import movement.TumStudentMovement;
 import util.Range;
 
 import java.util.*;
 
-/**
- * Created by lorenzodonini on 11/11/15.
- */
 public class StateGenerator {
     private static StateGenerator ourInstance = new StateGenerator();
 
@@ -27,14 +25,6 @@ public class StateGenerator {
     private double minLibraryTime;
     private double bathroomTime;
 
-    private static final String STATES_NAMESPACE = "States";
-    private static final String SETTINGS_PREP_TIME_BEFORE_LECTURE = "preparationTimeBeforeLecture";
-    private static final String SETTINGS_PROB_STAY_NO_LECTURE = "probStayNoLecture";
-    private static final String SETTINGS_EATING_PERIOD = "eatingPeriod";
-    private static final String SETTINGS_EATING_PROBABILITY = "eatingProbability";
-    private static final String SETTINGS_EAT_MIN_TIME = "minEatTime";
-    private static final String SETTINGS_BATHROOM_TIME = "bathroomStayTime";
-
     public static StateGenerator getInstance() {
         return ourInstance;
     }
@@ -46,20 +36,16 @@ public class StateGenerator {
     }
 
     public void initializeStates(final Settings settings) {
-        settings.setNameSpace(STATES_NAMESPACE);
-        preparationTimeBeforeLecture = settings.getDouble(SETTINGS_PREP_TIME_BEFORE_LECTURE);
-        probStayNoLecture = settings.getDouble(SETTINGS_PROB_STAY_NO_LECTURE);
-        eatingProbability = settings.getDouble(SETTINGS_EATING_PROBABILITY);
-        eatingPeriod = settings.getCsvRanges(SETTINGS_EATING_PERIOD)[0];
-        minEatPeriod = settings.getDouble(SETTINGS_EAT_MIN_TIME);
-        //TODO: CHANGE CLASS
-        minGroupStudyTime =
-                TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_GROUP_STUDY_MIN_TIME);
-        minIndividualStudyTime =
-                TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_INDIVIDUAL_STUDY_MIN_TIME);
-        minLibraryTime = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_LIBRARY_MIN_STAY);
-        bathroomTime = settings.getDouble(SETTINGS_BATHROOM_TIME);
-        settings.restoreNameSpace();
+        TumModelSettings params = TumModelSettings.getInstance();
+        preparationTimeBeforeLecture = params.getDouble(TumModelSettings.TUM_PREP_BEFORE_LECTURE);
+        probStayNoLecture = params.getDouble(TumModelSettings.TUM_PROB_STAY_NO_LECTURE);
+        eatingProbability = params.getDouble(TumModelSettings.TUM_EATING_PROBABILITY);
+        eatingPeriod = params.getRange(TumModelSettings.TUM_EATING_PERIOD);
+        minEatPeriod = params.getDouble(TumModelSettings.TUM_EATING_MIN_TIME);
+        minGroupStudyTime = params.getDouble(TumModelSettings.TUM_GROUP_STUDY_MIN_TIME);
+        minIndividualStudyTime = params.getDouble(TumModelSettings.TUM_INDIVIDUAL_STUDY_MIN_TIME);
+        minLibraryTime = params.getDouble(TumModelSettings.TUM_LIBRARY_MIN_STAY);
+        bathroomTime = params.getDouble(TumModelSettings.TUM_BATHROOM_TIME);
 
         //Main hall activities
         IState commonState = new MainHallState(settings);
@@ -122,8 +108,9 @@ public class StateGenerator {
 
         TumAction action;
         double timeUntilNextLecture = character.getTimeUntilNextLecture();
-        if (timeUntilNextLecture > 0) {
-            //We still have planned lectures today
+        if (character.hasOtherScheduledLectures()) {
+            //We still have planned lectures today.
+            // Beware, the variable could be negative and we could be slightly late
             if (timeUntilNextLecture <= preparationTimeBeforeLecture) {
                 action = TumAction.LECTURE;
             }

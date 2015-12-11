@@ -21,8 +21,7 @@ Group1.interface1 = myInterface
 Group1.bathroomTsProbability = 0.15
 
 # Transports
-Ubahn.period = 600
-Ubahn.capacity = 150
+Ubahn.subwayPeriod = 600
 
 # Communication Interface
 myInterface.type = SimpleBroadcastInterface

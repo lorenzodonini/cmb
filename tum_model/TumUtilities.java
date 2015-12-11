@@ -1,14 +1,9 @@
 package tum_model;
 
-import core.Settings;
 import core.SimClock;
 import core.SimScenario;
 import movement.TumCharacter;
-import util.Range;
 
-/**
- * Created by lorenzodonini on 09/12/15.
- */
 public class TumUtilities {
     private static TumUtilities ourInstance = new TumUtilities();
 

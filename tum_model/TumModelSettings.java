@@ -20,6 +20,9 @@ public class TumModelSettings {
     //Students
     private static final String STUDENTS_NS = "Group1";
     public static final String TUM_BATHROOM_PROBABILITY = "bathroomTsProbability";
+    //UBahn
+    private static final String UBAHN_NS = "Ubahn";
+    public static final String TUM_UBAHN_PERIOD = "subwayPeriod";
     //Building
     private static final String BUILDING_NS = "Building";
     public static final String TUM_LECTURE_START = "lectureStartTime";
@@ -68,10 +71,13 @@ public class TumModelSettings {
         settings.setNameSpace(STUDENTS_NS);
         loadDoubleSetting(settings,TUM_BATHROOM_PROBABILITY);
 
+        settings.setNameSpace(UBAHN_NS);
+        loadDoubleSetting(settings,TUM_UBAHN_PERIOD);
+
         settings.setNameSpace(BUILDING_NS);;
         loadDoubleSetting(settings,TUM_LECTURE_START);
         loadDoubleSetting(settings,TUM_LECTURE_END);
-        loadDoubleSetting(settings,TUM_MAX_DAILY_LECTURES);
+        loadIntegerSetting(settings,TUM_MAX_DAILY_LECTURES);
         loadDoubleSetting(settings,TUM_PROB_ATTENDING_NEXT);
         loadIntegerSetting(settings,TUM_HIGH_POPULATION);
         loadDoubleSetting(settings,TUM_PROB_ATTENDING_HIGH_POP);

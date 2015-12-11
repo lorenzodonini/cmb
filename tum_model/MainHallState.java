@@ -59,7 +59,8 @@ public class MainHallState implements IState {
         } while (!FmiBuilding.getInstance().isInMainHall(coord));
 
         //If we are meeting some people, we may want to go to a specific location
-        if (character.getCurrentAction() == TumAction.SOCIAL) {
+        if (character.getCurrentAction() == TumAction.SOCIAL
+                || character.getCurrentAction() == TumAction.GROUP_STUDY) {
             SocialPool.SocialGroup group = SocialPool.getInstance().findFriends(character,coord);
             character.setSocialGroup(group);
             coord = group.getLocation();
@@ -108,7 +109,8 @@ public class MainHallState implements IState {
 
     @Override
     public void exitState(TumCharacter character) {
-        if (character.getCurrentAction() == TumAction.SOCIAL) {
+        if (character.getCurrentAction() == TumAction.SOCIAL
+                || character.getCurrentAction() == TumAction.GROUP_STUDY) {
             SocialPool.getInstance().leaveSocialGroup(character);
         }
         TumUtilities.printStateAccessDetails(character,false);

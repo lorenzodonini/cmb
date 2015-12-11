@@ -1,20 +1,27 @@
 ## Settings that define ProhibitedPolygonRwp movement with one group of nodes.
 
 Scenario.name = TumScenario
-Scenario.endTime = 18000
+Scenario.endTime = 86400
 Scenario.updateInterval = 1
 Scenario.simulateConnections = false
+Scenario.timeSlot = 3600
 MovementModel.worldSize = 1000,1000
 Events.nrof = 0
 
 # Groups
 Scenario.nrofHostGroups = 1
 Scenario.hallUpperLeft = 100,100
-Scenario.hallSize = 800,450
+Scenario.hallSize = 1000,1000
+
+# Students
 Group1.groupID = student
-Group1.nrofHosts = 30
+Group1.nrofHosts = 300
 Group1.nrofInterfaces = 1
 Group1.interface1 = myInterface
+Group1.bathroomTsProbability = 0.15
+
+# Transports
+Ubahn.subwayPeriod = 600
 
 # Communication Interface
 myInterface.type = SimpleBroadcastInterface
@@ -24,11 +31,36 @@ Group1.movementModel = TumStudentMovement
 Group1.router = PassiveRouter
 
 # Report
-Report.nrofReports = 0
+Report.nrofReports = 2
 Report.reportDir = reports
+Report.report1 = SamplingReport
+Report.report2 = FlightLengthReport
+
 
 # Building
-Building.lectureStartTime = 1800
-Building.lectureEndTime = 16200
+Building.lectureStartTime = 28800
+Building.lectureEndTime = 64800
+Building.maxLecturesPerDay = 4
+Building.probAttendingNextLecture = 0.5
+Building.mediumPopulation = 40
+Building.probAttendingMedPopLecture = 0.35
+Building.highPopulation = 200
+Building.probAttendingHighPopLecture = 0.45
+Building.probOneHourLecture = 0.1
+Building.probTwoHourLecture = 0.8
+Building.probThreeHourLecture = 0.1
 Building.lectureDuration = 2700
-Building.timeSlot = 3600
+
+# States
+States.bathroomStayTime = 180
+States.preparationTimeBeforeLecture = 600
+States.probStayNoLecture = 0.3
+States.eatingPeriod = 39600-54000
+States.eatingProbability = 0.5
+States.minEatTime = 300
+States.minGroupStudyTime = 2400
+States.minGroupPeople = 2
+States.maxGroupPeople = 6
+States.minIndividualStudyTime = 900
+States.peoplePerSocialGroupMax = 4
+States.minLibraryStay = 600

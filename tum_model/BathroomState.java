@@ -6,9 +6,6 @@ import core.SimClock;
 import movement.Path;
 import movement.TumCharacter;
 
-/**
- * Created by lorenzodonini on 25/11/15.
- */
 public class BathroomState implements IState {
     private Coord bathroomCoord;
     private double bathroomStayDuration;

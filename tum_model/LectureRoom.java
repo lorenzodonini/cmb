@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Created by robert on 22-Nov-15.
- */
 public class LectureRoom {
     private Coord position;
     private int capacity;

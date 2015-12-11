@@ -6,9 +6,6 @@ import movement.TumCharacter;
 
 import java.util.List;
 
-/**
- * Created by rober on 22-Nov-15.
- */
 public class LectureState implements IState
 {
     public LectureState() {

@@ -3,12 +3,9 @@ package tum_model;
 import movement.Path;
 import movement.TumCharacter;
 
-/**
- * Created by rober on 11-Nov-15.
- */
 public interface IState {
-    public void enterState(TumCharacter character);
-    public Path getPathForCharacter(TumCharacter character);
-    public double getPauseTimeForCharacter(TumCharacter character);
-    public void exitState(TumCharacter character);
+    void enterState(TumCharacter character);
+    Path getPathForCharacter(TumCharacter character);
+    double getPauseTimeForCharacter(TumCharacter character);
+    void exitState(TumCharacter character);
 }

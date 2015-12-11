@@ -1,7 +1,6 @@
 package movement;
 
 import core.Coord;
-import core.Message;
 import core.Settings;
 import core.SimClock;
 import tum_model.*;
@@ -9,9 +8,6 @@ import tum_model.*;
 import java.util.List;
 import java.util.Queue;
 
-/**
- * Created by lorenzodonini on 11/11/15.
- */
 public class TumStudentMovement extends TumCharacter {
     private Queue<Lecture> registeredLectures;
     private Lecture currentLecture;
@@ -38,7 +34,7 @@ public class TumStudentMovement extends TumCharacter {
         double timeSlot = TumModelSettings.getInstance().getDouble(TumModelSettings.TUM_TIME_SLOT);
         if (hasOtherScheduledLectures()) {
             Lecture firstLecture = getNextScheduledLecture();
-            double random = rng.nextDouble() * (timeSlot/2);
+            double random = rng.nextDouble() * (timeSlot/4);
             return firstLecture.getStartTime() - (prepTimeBeforeLecture + random);
         }
         else {
@@ -63,7 +59,7 @@ public class TumStudentMovement extends TumCharacter {
     @Override
     public double getTimeUntilNextLecture() {
         if (registeredLectures.isEmpty()) {
-            return -1;
+            return 0;
         }
         return registeredLectures.peek().getStartTime() - SimClock.getTime();
     }
@@ -112,17 +108,24 @@ public class TumStudentMovement extends TumCharacter {
         if (getCurrentState() != null) {
             Path newPath = getCurrentState().getPathForCharacter(this);
             if (newPath == null) {
+                setLastWaypoint(p);
                 return p;
             }
 
             for (Coord c : newPath.getCoords()) {
                 p.addWaypoint(c);
             }
+            setLastWaypoint(p);
             return p;
         }
         else {
             return null;
         }
+    }
+
+    private void setLastWaypoint(Path p) {
+        List<Coord> coords = p.getCoords();
+        lastWaypoint = coords.get(coords.size() - 1);
     }
 
     @Override
