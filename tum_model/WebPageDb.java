@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class WebPageDb {
 
-    WebPageDb(int pageCount, int minSize, int maxSize) {
+    public WebPageDb(int pageCount, int minSize, int maxSize) {
         this.zipf = new ZipfGenerator(pageCount, 1);
 
         webPages = new ArrayList<>(pageCount);
@@ -21,7 +21,7 @@ public class WebPageDb {
     }
 
 
-    WebPage getRandomPage()
+    public WebPage getRandomPage()
     {
         return webPages.get(zipf.next());
     }
