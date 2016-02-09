@@ -656,5 +656,4 @@ public abstract class ActiveRouter extends MessageRouter {
 		}
 		return top;
 	}
-	
 }

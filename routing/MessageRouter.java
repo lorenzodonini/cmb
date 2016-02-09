@@ -297,6 +297,12 @@ public abstract class MessageRouter {
 		m2 = m.replicate();	// send a replicate of the message
 		to.receiveMessage(m2, this.host);
 	}
+
+	/** ADDED BY LORENZO DONINI
+	 * TODO: IMPLEMENT */
+	public int forwardMessage(Message m, Connection c) {
+		return 0;
+	}
 	
 	/**
 	 * Requests for deliverable message from this router to be sent trough a
