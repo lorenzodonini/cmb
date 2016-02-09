@@ -31,7 +31,7 @@ public class ZipfGenerator {
         friquency = (1.0d / Math.pow(rank, this.skew)) / this.bottom;
         dice = rnd.nextDouble();
 
-        while(!(dice &lt; friquency)) {
+        while(!(dice < friquency)) {
             rank = rnd.nextInt(size);
             friquency = (1.0d / Math.pow(rank, this.skew)) / this.bottom;
             dice = rnd.nextDouble();
