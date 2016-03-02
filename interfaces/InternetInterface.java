@@ -29,7 +29,9 @@ public class InternetInterface extends SimpleBroadcastInterface {
 
     @Override
     public void connect(NetworkInterface anotherInterface) {
-        if (anotherInterface.getHost().getAddress() == internetNodeAddress && !isConnected(anotherInterface)) {
+        if (anotherInterface.getHost().getAddress() == internetNodeAddress
+                && getHost().getAddress() != internetNodeAddress
+                && !isConnected(anotherInterface)) {
             int conSpeed = anotherInterface.getTransmitSpeed(this);
             if (conSpeed > this.transmitSpeed) {
                 conSpeed = this.transmitSpeed;

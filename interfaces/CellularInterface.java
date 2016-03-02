@@ -44,6 +44,7 @@ public class CellularInterface extends SimpleBroadcastInterface {
         }
     }
 
+    @Override
     public String toString() {
         return "CellularInterface " + super.toString();
     }
