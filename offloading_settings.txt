@@ -16,12 +16,12 @@ highspeedInterface.transmitSpeed = 10M
 highspeedInterface.transmitRange = 10000
 
 cellularInterface.type = CellularInterface
-cellularInterface.transmitSpeed = 20M
+cellularInterface.transmitSpeed = 2.5M
 cellularInterface.transmitRange = 2500
 cellularInterface.towerAddress = 1
 
 wlanInterface.type = WLANInterface
-wlanInterface.transmitSpeed = 20M
+wlanInterface.transmitSpeed = 2.5M
 wlanInterface.transmitRange = 100
 
 internetInterface.type = InternetInterface
@@ -35,10 +35,12 @@ internetApplication.pageCount = 100
 internetApplication.minSize = 300k
 internetApplication.maxSize = 3M
 
+mobileApplication.type = MobileWebApplication
+mobileApplication.requestSize = 1k
+mobileApplication.requestInterval = 150,450
+
 # Define 6 different node groups
 Scenario.nrofHostGroups = 36
-
-application1.type = InternetApplication
 
 ## Group and movement model specific settings
 # pois: Points Of Interest indexes and probabilities (poiIndex1, poiProb1, poiIndex2, poiProb2, ... )
@@ -64,7 +66,7 @@ Group.interface1 = wlanInterface
 Group.interface2 = internetInterface
 Group.router = InfrastructureRouter
 Group.speed = 0.5, 1.5
-Group.msgTtl = 0
+Group.msgTtl = 1
 
 # group1 (internet node)
 Group1.groupID = i
@@ -91,26 +93,13 @@ Group2.nrofHosts = 1
 Group3.groupID = p
 Group3.nrofHosts = 1
 Group3.nrofInterfaces = 1
+Group3.nrofApplications = 1
 Group3.interface1 = wlanInterface
+Group3.application1 = mobileApplication
 Group3.router = OffloadingRouter
 
-
-## Message creation parameters
 # How many event generators
-Events.nrof = 1
-# Class of the first event generator
-Events1.class = OffloadingMessageEventGenerator
-# Creation interval in seconds
-Events1.interval = 250,350
-# Message size
-Events1.size = 1k,1k
-# range of message source addresses
-Events1.hosts = 2,3
-# Destination node is always the internet
-Events1.tohosts = 0,1
-# Message ID prefix
-Events1.prefix = M
-
+Events.nrof = 0
 
 ## Movement model settings
 MovementModel.rngSeed = 1
@@ -119,16 +108,10 @@ MovementModel.warmup = 1000
 
 ## Map based movement -movement model specific settings
 MapBasedMovement.nrofMapFiles = 4
-
 MapBasedMovement.mapFile1 = data/roads.wkt
 MapBasedMovement.mapFile2 = data/main_roads.wkt
 MapBasedMovement.mapFile3 = data/pedestrian_paths.wkt
 MapBasedMovement.mapFile4 = data/shops.wkt
-
-## Default settings for some routers settings
-ProphetRouter.secondsInTimeUnit = 30
-SprayAndWaitRouter.nrofCopies = 6
-SprayAndWaitRouter.binaryMode = true
 
 ## Optimization settings -- these affect the speed of the simulation
 ## see World class for details.

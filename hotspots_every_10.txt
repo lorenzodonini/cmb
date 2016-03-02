@@ -1,0 +1,197 @@
+Group4.groupID = HotSpot.0
+Group4.nrofHosts = 1
+Group4.movementModel = StationaryMovement
+Group4.nodeLocation = 112, 1778
+Group4.nrOfApplications = 0
+
+Group5.groupID = HotSpot.10
+Group5.nrofHosts = 1
+Group5.movementModel = StationaryMovement
+Group5.nodeLocation = 907, 1962
+Group5.nrOfApplications = 0
+
+Group6.groupID = HotSpot.20
+Group6.nrofHosts = 1
+Group6.movementModel = StationaryMovement
+Group6.nodeLocation = 914, 1611
+Group6.nrOfApplications = 0
+
+Group7.groupID = HotSpot.30
+Group7.nrofHosts = 1
+Group7.movementModel = StationaryMovement
+Group7.nodeLocation = 1035, 585
+Group7.nrOfApplications = 0
+
+Group8.groupID = HotSpot.40
+Group8.nrofHosts = 1
+Group8.movementModel = StationaryMovement
+Group8.nodeLocation = 1235, 259
+Group8.nrOfApplications = 0
+
+Group9.groupID = HotSpot.50
+Group9.nrofHosts = 1
+Group9.movementModel = StationaryMovement
+Group9.nodeLocation = 1643, 1756
+Group9.nrOfApplications = 0
+
+Group10.groupID = HotSpot.60
+Group10.nrofHosts = 1
+Group10.movementModel = StationaryMovement
+Group10.nodeLocation = 1345, 1591
+Group10.nrOfApplications = 0
+
+Group11.groupID = HotSpot.70
+Group11.nrofHosts = 1
+Group11.movementModel = StationaryMovement
+Group11.nodeLocation = 1349, 1461
+Group11.nrOfApplications = 0
+
+Group12.groupID = HotSpot.80
+Group12.nrofHosts = 1
+Group12.movementModel = StationaryMovement
+Group12.nodeLocation = 1754, 1287
+Group12.nrOfApplications = 0
+
+Group13.groupID = HotSpot.90
+Group13.nrofHosts = 1
+Group13.movementModel = StationaryMovement
+Group13.nodeLocation = 1685, 1155
+Group13.nrOfApplications = 0
+
+Group14.groupID = HotSpot.100
+Group14.nrofHosts = 1
+Group14.movementModel = StationaryMovement
+Group14.nodeLocation = 1758, 1032
+Group14.nrOfApplications = 0
+
+Group15.groupID = HotSpot.110
+Group15.nrofHosts = 1
+Group15.movementModel = StationaryMovement
+Group15.nodeLocation = 1450, 737
+Group15.nrOfApplications = 0
+
+Group16.groupID = HotSpot.120
+Group16.nrofHosts = 1
+Group16.movementModel = StationaryMovement
+Group16.nodeLocation = 1713, 496
+Group16.nrOfApplications = 0
+
+Group17.groupID = HotSpot.130
+Group17.nrofHosts = 1
+Group17.movementModel = StationaryMovement
+Group17.nodeLocation = 1243, 284
+Group17.nrOfApplications = 0
+
+Group18.groupID = HotSpot.140
+Group18.nrofHosts = 1
+Group18.movementModel = StationaryMovement
+Group18.nodeLocation = 2297, 2346
+Group18.nrOfApplications = 0
+
+Group19.groupID = HotSpot.150
+Group19.nrofHosts = 1
+Group19.movementModel = StationaryMovement
+Group19.nodeLocation = 2068, 2147
+Group19.nrOfApplications = 0
+
+Group20.groupID = HotSpot.160
+Group20.nrofHosts = 1
+Group20.movementModel = StationaryMovement
+Group20.nodeLocation = 2144, 1969
+Group20.nrOfApplications = 0
+
+Group21.groupID = HotSpot.170
+Group21.nrofHosts = 1
+Group21.movementModel = StationaryMovement
+Group21.nodeLocation = 2341, 1882
+Group21.nrOfApplications = 0
+
+Group22.groupID = HotSpot.180
+Group22.nrofHosts = 1
+Group22.movementModel = StationaryMovement
+Group22.nodeLocation = 2104, 1726
+Group22.nrOfApplications = 0
+
+Group23.groupID = HotSpot.190
+Group23.nrofHosts = 1
+Group23.movementModel = StationaryMovement
+Group23.nodeLocation = 2261, 1574
+Group23.nrOfApplications = 0
+
+Group24.groupID = HotSpot.200
+Group24.nrofHosts = 1
+Group24.movementModel = StationaryMovement
+Group24.nodeLocation = 2196, 1478
+Group24.nrOfApplications = 0
+
+Group25.groupID = HotSpot.210
+Group25.nrofHosts = 1
+Group25.movementModel = StationaryMovement
+Group25.nodeLocation = 2273, 1307
+Group25.nrOfApplications = 0
+
+Group26.groupID = HotSpot.220
+Group26.nrofHosts = 1
+Group26.movementModel = StationaryMovement
+Group26.nodeLocation = 1987, 756
+Group26.nrOfApplications = 0
+
+Group27.groupID = HotSpot.230
+Group27.nrofHosts = 1
+Group27.movementModel = StationaryMovement
+Group27.nodeLocation = 2541, 2295
+Group27.nrOfApplications = 0
+
+Group28.groupID = HotSpot.240
+Group28.nrofHosts = 1
+Group28.movementModel = StationaryMovement
+Group28.nodeLocation = 2927, 2054
+Group28.nrOfApplications = 0
+
+Group29.groupID = HotSpot.250
+Group29.nrofHosts = 1
+Group29.movementModel = StationaryMovement
+Group29.nodeLocation = 2645, 1776
+Group29.nrOfApplications = 0
+
+Group30.groupID = HotSpot.260
+Group30.nrofHosts = 1
+Group30.movementModel = StationaryMovement
+Group30.nodeLocation = 2394, 1226
+Group30.nrOfApplications = 0
+
+Group31.groupID = HotSpot.270
+Group31.nrofHosts = 1
+Group31.movementModel = StationaryMovement
+Group31.nodeLocation = 2453, 578
+Group31.nrOfApplications = 0
+
+Group32.groupID = HotSpot.280
+Group32.nrofHosts = 1
+Group32.movementModel = StationaryMovement
+Group32.nodeLocation = 3189, 601
+Group32.nrOfApplications = 0
+
+Group33.groupID = HotSpot.290
+Group33.nrofHosts = 1
+Group33.movementModel = StationaryMovement
+Group33.nodeLocation = 3263, 424
+Group33.nrOfApplications = 0
+
+Group34.groupID = HotSpot.300
+Group34.nrofHosts = 1
+Group34.movementModel = StationaryMovement
+Group34.nodeLocation = 2989, 233
+Group34.nrOfApplications = 0
+
+Group35.groupID = HotSpot.310
+Group35.nrofHosts = 1
+Group35.movementModel = StationaryMovement
+Group35.nodeLocation = 3718, 1259
+Group35.nrOfApplications = 0
+
+Group36.groupID = HotSpot.320
+Group36.nrofHosts = 1
+Group36.movementModel = StationaryMovement
+Group36.nodeLocation = 4147, 1204
+Group36.nrOfApplications = 0
