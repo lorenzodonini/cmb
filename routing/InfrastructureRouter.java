@@ -1,32 +1,19 @@
 package routing;
 
+import applications.InfrastructureManager;
 import core.*;
-
-import java.util.List;
 
 /**
  * Created by lorenzodonini on 20/01/16.
  */
-public class CellularRouter extends ActiveRouter {
-    protected final int KB_SIZE = 1024;
-    protected final int MB_SIZE = 1024*1024;
-    private int counter = 0;
-    private int mInternetAddress;
-    private Message lastMessageToInet;
-    private Message lastMessageFromInet;
-    private static final String NS_INTERNET_INTERFACE = "internetInterface";
-    private static final String NS_INTERNET_ADDRESS = "internetAddress";
+public class InfrastructureRouter extends ActiveRouter {
 
-    public CellularRouter(Settings s) {
+    public InfrastructureRouter(Settings s) {
         super(s);
-        s.setNameSpace(NS_INTERNET_INTERFACE);
-        mInternetAddress = s.getInt(NS_INTERNET_ADDRESS);
-        s.restoreNameSpace();
     }
 
-    public CellularRouter(CellularRouter other) {
+    public InfrastructureRouter(InfrastructureRouter other) {
         super(other);
-        mInternetAddress = other.mInternetAddress;
     }
 
     @Override
@@ -37,31 +24,30 @@ public class CellularRouter extends ActiveRouter {
             return; // transferring, don't try other connections yet
         }
 
-        for (Message m : getMessageCollection()) {
-            if (m.getTo().getAddress() == mInternetAddress) {
-                //We have a request packet to the internet
-                Message result = routePacket(m);
-                if (result != null) {
-                    lastMessageToInet = result;
-                    break;
-                }
-            }
-            else if (m.getFrom().getAddress() == mInternetAddress) {
-                //We have a response packet from the internet
-                Message result = routePacket(m);
-                if (result != null) {
-                    lastMessageFromInet = result;
-                    break;
-                }
-            }
-        }
-
         // Try first the messages that can be delivered to final recipient
-        if (exchangeDeliverableMessages() != null) {
+        Connection delivered = exchangeDeliverableMessages();
+        if (delivered != null) {
             return; // started a transfer, don't try others (yet)
         }
 
-        List<Connection> conns = getConnections();
+        int internetAddress = InfrastructureManager.getInstance().getInternetNode().getAddress();
+
+        for (Message m : getMessageCollection()) {
+            if (m.getTo().getAddress() == internetAddress) {
+                //We have a request packet to the internet
+                Message result = routePacket(m);
+                if (result != null) {
+                    break;
+                }
+            }
+            else if (m.getFrom().getAddress() == internetAddress) {
+                //We have a response packet from the internet
+                Message result = routePacket(m);
+                if (result != null) {
+                    break;
+                }
+            }
+        }
     }
 
     private Message routePacket(Message m) {
@@ -78,6 +64,6 @@ public class CellularRouter extends ActiveRouter {
 
     @Override
     public MessageRouter replicate() {
-        return new CellularRouter(this);
+        return new InfrastructureRouter(this);
     }
 }
