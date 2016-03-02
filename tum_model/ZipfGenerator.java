@@ -24,16 +24,16 @@ public class ZipfGenerator {
     // The frequency of returned rank ids are follows Zipf distribution.
     public int next() {
         int rank;
-        double friquency = 0;
+        double frequency = 0;
         double dice;
 
         rank = rnd.nextInt(size);
-        friquency = (1.0d / Math.pow(rank, this.skew)) / this.bottom;
+        frequency = (1.0d / Math.pow(rank, this.skew)) / this.bottom;
         dice = rnd.nextDouble();
 
-        while(!(dice < friquency)) {
+        while(!(dice < frequency)) {
             rank = rnd.nextInt(size);
-            friquency = (1.0d / Math.pow(rank, this.skew)) / this.bottom;
+            frequency = (1.0d / Math.pow(rank, this.skew)) / this.bottom;
             dice = rnd.nextDouble();
         }
 
