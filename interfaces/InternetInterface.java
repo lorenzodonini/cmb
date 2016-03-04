@@ -1,30 +1,32 @@
 package interfaces;
 
+import applications.InfrastructureManager;
 import core.CBRConnection;
 import core.Connection;
 import core.NetworkInterface;
 import core.Settings;
 
-/**
- * Created by lorenzodonini on 08/02/16.
- */
 public class InternetInterface extends SimpleBroadcastInterface {
-    private int internetNodeAddress;
-    private static final String NS_INTERNET_ADDRESS = "internetAddress";
+    private int internetNodeAddress = -1;
 
     public InternetInterface(Settings s) {
         super(s);
-        internetNodeAddress = s.getInt(NS_INTERNET_ADDRESS);
     }
 
     public InternetInterface(InternetInterface ii) {
         super(ii);
-        internetNodeAddress = ii.internetNodeAddress;
     }
 
     @Override
     public NetworkInterface replicate() {
         return new InternetInterface(this);
+    }
+
+    public void update() {
+        super.update();
+        if (internetNodeAddress < 0) {
+            internetNodeAddress = InfrastructureManager.getInstance().getInternetNode().getAddress();
+        }
     }
 
     @Override

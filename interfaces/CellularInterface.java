@@ -1,27 +1,30 @@
 package interfaces;
 
+import applications.InfrastructureManager;
 import core.*;
 
-/**
- * Created by lorenzodonini on 30/01/16.
- */
 public class CellularInterface extends SimpleBroadcastInterface {
-    private int cellularTowerAddress;
-    private static final String NS_TOWER_ADDRESS = "towerAddress";
+    private int cellularTowerAddress = -1;
 
     public CellularInterface(Settings s) {
         super(s);
-        cellularTowerAddress = s.getInt(NS_TOWER_ADDRESS);
     }
 
     public CellularInterface(CellularInterface ci) {
         super(ci);
-        cellularTowerAddress = ci.cellularTowerAddress;
     }
 
     @Override
     public NetworkInterface replicate() {
         return new CellularInterface(this);
+    }
+
+    @Override
+    public void update() {
+        super.update();
+        if (cellularTowerAddress < 0) {
+            cellularTowerAddress = InfrastructureManager.getInstance().getCellularTower().getAddress();
+        }
     }
 
     @Override
