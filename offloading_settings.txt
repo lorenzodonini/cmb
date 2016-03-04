@@ -18,7 +18,6 @@ highspeedInterface.transmitRange = 10000
 cellularInterface.type = CellularInterface
 cellularInterface.transmitSpeed = 2.5M
 cellularInterface.transmitRange = 2500
-cellularInterface.towerAddress = 1
 
 wlanInterface.type = WLANInterface
 wlanInterface.transmitSpeed = 2.5M
@@ -27,7 +26,6 @@ wlanInterface.transmitRange = 100
 internetInterface.type = InternetInterface
 internetInterface.transmitSpeed = 100M
 internetInterface.transmitRange = 10000
-internetInterface.internetAddress = 0
 
 # Application specific settings
 internetApplication.type = InternetApplication
@@ -38,9 +36,10 @@ internetApplication.maxSize = 3M
 mobileApplication.type = MobileWebApplication
 mobileApplication.requestSize = 1k
 mobileApplication.requestInterval = 150,450
+mobileApplication.cacheSize = 0
 
 # Define 6 different node groups
-Scenario.nrofHostGroups = 36
+Scenario.nrofHostGroups = 8
 
 ## Group and movement model specific settings
 # pois: Points Of Interest indexes and probabilities (poiIndex1, poiProb1, poiIndex2, poiProb2, ... )
@@ -50,23 +49,17 @@ Scenario.nrofHostGroups = 36
 # routeFile: route's file path - for MapRouteMovement
 # routeType: route's type - for MapRouteMovement
 
-# normal mode
-Routing.routeMode = 0
-Routing.cacheSize = 10
-Routing.offloadWaitTime = 0
-
-
 # Common settings for all groups
 Group.movementModel = ShortestPathMapBasedMovement
 Group.router = EpidemicRouter
 Group.bufferSize = 5M
+Group.msgTtl = 3
 Group.waitTime = 0, 120
 Group.nrofInterfaces = 2
 Group.interface1 = wlanInterface
 Group.interface2 = internetInterface
 Group.router = InfrastructureRouter
 Group.speed = 0.5, 1.5
-Group.msgTtl = 1
 
 # group1 (internet node)
 Group1.groupID = i
@@ -97,6 +90,9 @@ Group3.nrofApplications = 1
 Group3.interface1 = wlanInterface
 Group3.application1 = mobileApplication
 Group3.router = OffloadingRouter
+Group3.p2pEnabled = false
+Group3.wifiOffloadEnabled = false
+Group3.offloadWaitTime = 0
 
 # How many event generators
 Events.nrof = 0
@@ -106,12 +102,14 @@ MovementModel.rngSeed = 1
 MovementModel.worldSize = 4500, 3400
 MovementModel.warmup = 1000
 
+
 ## Map based movement -movement model specific settings
 MapBasedMovement.nrofMapFiles = 4
 MapBasedMovement.mapFile1 = data/roads.wkt
 MapBasedMovement.mapFile2 = data/main_roads.wkt
 MapBasedMovement.mapFile3 = data/pedestrian_paths.wkt
 MapBasedMovement.mapFile4 = data/shops.wkt
+
 
 ## Optimization settings -- these affect the speed of the simulation
 ## see World class for details.

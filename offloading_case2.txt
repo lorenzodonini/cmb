@@ -1,0 +1,27 @@
+# case 2: All cellular with instant WiFi offloading
+
+# group3 (pedestrians) specific settings, Cellular + WiFi
+Group3.groupID = p
+Group3.nrofHosts = 1
+Group3.nrofInterfaces = 2
+Group3.nrofApplications = 1
+Group3.interface1 = cellularInterface
+Group3.interface2 = wlanInterface
+Group3.application1 = mobileApplication
+Group3.router = OffloadingRouter
+Group3.speed = 0.5,1.5
+
+# Routing settings
+OffloadingRouter.p2pEnabled = false
+OffloadingRouter.wifiOffloadEnabled = true
+OffloadingRouter.offloadWaitTime = 0
+
+# Dummy empty groups, needed just to not refactor the hotspot settings
+Group4.groupID = none4
+Group4.nrofHosts = 0
+Group5.groupID = none5
+Group5.nrofHosts = 0
+Group6.groupID = none6
+Group6.nrofHosts = 0
+Group7.groupID = none7
+Group7.nrofHosts = 0

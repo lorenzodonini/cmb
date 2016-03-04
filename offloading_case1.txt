@@ -1,0 +1,35 @@
+# case 1: 50% Cellular network only : 50% WiFi only users
+
+# group3 (pedestrians) specific settings, Cellular only
+Group3.groupID = pc
+Group3.nrofHosts = 1
+Group3.nrofInterfaces = 1
+Group3.nrofApplications = 1
+Group3.interface1 = cellularInterface
+Group3.application1 = mobileApplication
+Group3.router = OffloadingRouter
+Group3.speed = 0.5,1.5
+
+# group4 (pedestrians) specific settings, WiFi only
+Group4.groupID = pw
+Group4.nrofHosts = 1
+Group4.nrofInterfaces = 1
+Group4.nrofApplications = 1
+Group4.interface1 = wlanInterface
+Group4.application1 = mobileApplication
+Group4.router = OffloadingRouter
+Group4.speed = 0.5,1.5
+
+# Routing settings
+OffloadingRouter.p2pEnabled = false
+OffloadingRouter.wifiOffloadEnabled = false
+OffloadingRouter.offloadWaitTime = -1
+
+
+# Dummy empty groups, needed just to not refactor the hotspot settings
+Group5.groupID = none5
+Group5.nrofHosts = 0
+Group6.groupID = none6
+Group6.nrofHosts = 0
+Group7.groupID = none7
+Group7.nrofHosts = 0
