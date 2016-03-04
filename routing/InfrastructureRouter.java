@@ -30,17 +30,17 @@ public class InfrastructureRouter extends ActiveRouter {
             return; // started a transfer, don't try others (yet)
         }
 
-        int internetAddress = InfrastructureManager.getInstance().getInternetNode().getAddress();
+        DTNHost internetNode = InfrastructureManager.getInstance().getInternetNode();
 
         for (Message m : getMessageCollection()) {
-            if (m.getTo().getAddress() == internetAddress) {
+            if (m.getTo() == internetNode) {
                 //We have a request packet to the internet
                 Message result = routePacket(m);
                 if (result != null) {
                     break;
                 }
             }
-            else if (m.getFrom().getAddress() == internetAddress) {
+            else if (m.getFrom() == internetNode) {
                 //We have a response packet from the internet
                 Message result = routePacket(m);
                 if (result != null) {
@@ -60,6 +60,34 @@ public class InfrastructureRouter extends ActiveRouter {
             }
         }
         return null;
+    }
+
+    /*@Override
+    public Message messageTransferred(String id, DTNHost from) {
+        Message transferred = super.messageTransferred(id, from);
+
+        /* This is a passive infrastructure router. If it received a response,
+        then it was because a request message had been relayed before that.
+        Once a valid response has been received, the request message should
+        never be relayed again.
+        if (transferred.getRequest() != null) {
+            deleteMessage(transferred.getRequest().getId(),false);
+        }
+
+        return transferred;
+    }*/
+
+    @Override
+    protected void transferDone(Connection con) {
+        super.transferDone(con);
+
+        Message transferred = con.getMessage();
+        if (transferred.getRequest() != null) {
+            if (transferred.getTo() == transferred.getRequest().getFrom()) {
+                deleteMessage(transferred.getId(),false);
+                deleteMessage(transferred.getRequest().getId(),false);
+            }
+        }
     }
 
     @Override

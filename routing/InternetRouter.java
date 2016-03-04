@@ -2,9 +2,6 @@ package routing;
 
 import core.*;
 
-/**
- * Created by lorenzodonini on 28/02/16.
- */
 public class InternetRouter extends ActiveRouter {
 
     public InternetRouter(Settings s) {
@@ -53,6 +50,19 @@ public class InternetRouter extends ActiveRouter {
                     }
                 }
             }
+        }
+    }
+
+    @Override
+    protected void transferDone(Connection con) {
+        super.transferDone(con);
+
+        Message transferred = con.getMessage();
+        if (transferred.getRequest() != null) {
+            /* Removing the response message from the queue directly.
+            We know that is was delivered already, and since we don't want the
+            router to try resending it until the TLL expires, we drop it immediately. */
+            deleteMessage(transferred.getId(), false);
         }
     }
 
