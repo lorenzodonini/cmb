@@ -58,7 +58,7 @@ public class InternetApplication extends Application {
             m.addProperty(WebPageDb.WEB_PAGE_PROPERTY, page);
             //By setting the original request, we already have the full path, needed for routing purposes
             m.setRequest(msg);
-            m.setAppID(getAppID());
+            m.setAppID(MobileWebApplication.APP_ID);
 
             //Response message gets created, this will be routed inside the update function (of the router)
             host.createNewMessage(m);
