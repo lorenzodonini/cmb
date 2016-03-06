@@ -7,6 +7,7 @@ import tum_model.WebPage;
 import tum_model.WebPageDb;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 
@@ -67,12 +68,13 @@ public class MobileWebApplication extends Application {
         }
 
         mRandom = new Random();
-
-        super.setAppID(APP_ID);
     }
 
     /** Copy constructor */
     public MobileWebApplication(MobileWebApplication other) {
+        setAppListeners(other.getAppListeners());
+        setAppID(APP_ID);
+
         minRequestInterval = other.minRequestInterval;
         maxRequestInterval = other.maxRequestInterval;
         requestSize = other.requestSize;
@@ -179,6 +181,7 @@ public class MobileWebApplication extends Application {
             if (mCacheSize > 0) {
                 //Checking if we are requesting a page we have in cache ourselves already
                 if (checkCacheForWebPage(randPage) != null) {
+                    //TODO: TO CHANGE
                     sendEventToListeners(id+" delivered to source host",null,host);
                     host.deleteMessage(id,false);
                 }
