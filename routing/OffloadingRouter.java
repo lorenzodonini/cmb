@@ -3,7 +3,6 @@ package routing;
 import applications.InfrastructureManager;
 import applications.MobileWebApplication;
 import core.*;
-import interfaces.CellularInterface;
 import interfaces.WLANInterface;
 
 import java.util.*;
@@ -21,19 +20,12 @@ public class OffloadingRouter extends ActiveRouter {
 
     private static final String NS_ROUTING = "OffloadingRouter"; //Namespace
 
-    private static final String PROP_NEIGHBORS = "neighbors";
+    private static final String PROP_CONTACTED_NEIGHBORS = "neighbors";
 
     public OffloadingRouter(Settings s) {
         super(s);
         s.setNameSpace(NS_ROUTING);
 
-        /*int mode = s.getInt(NS_ROUTE_MODE);
-        for (RouteMode r : RouteMode.values()) {
-            if (r.ordinal() == mode) {
-                mMode = r;
-                break;
-            }
-        }*/
         p2pOffloadingEnabled = s.getBoolean(S_P2P_ENABLED, false);
         wifiOffloadingEnabled = s.getBoolean(S_OFFLOAD_ENABLED, false);
         offloadingTimeLimit = s.getInt(S_OFFLOAD_WAIT_TIME, -1);
@@ -86,19 +78,19 @@ public class OffloadingRouter extends ActiveRouter {
 
             //P2P offloading
             if (p2pOffloadingEnabled) {
-                Object prop = m.getProperty(PROP_NEIGHBORS);
-                List<Connection> neighbors;
-
+                Set<Connection> triedNeighbors;
+                Object prop = m.getProperty(PROP_CONTACTED_NEIGHBORS);
                 if (prop == null) {
-                    neighbors = getWifiNeighbors();
-                    m.addProperty(PROP_NEIGHBORS, neighbors);
+                    triedNeighbors = new HashSet<>();
+                    m.addProperty(PROP_CONTACTED_NEIGHBORS, triedNeighbors);
                 }
                 else {
-                    neighbors = (List<Connection>) prop;
+                    triedNeighbors = (Set<Connection>)prop;
                 }
-                if(tryMessageToPeers(m, neighbors)) {
-                    //Not removing the message itself, because this will be done by
-                    // the application, in case we receive a response from a peer
+                if (tryMessageToPeers(m,triedNeighbors)) {
+                    // Not removing the message itself, because this will be done by
+                    // the application, in case we receive a response from a peer.
+
                     return; //We managed to start the transfer
                 }
             }
@@ -120,6 +112,27 @@ public class OffloadingRouter extends ActiveRouter {
         }
     }
 
+    private boolean tryMessageToPeers(Message m, Set<Connection> triedNeighbors) {
+        //Replicating the original message, since we are playing around with the app ID
+        Message replica = m.replicate();
+        //Peers won't handle this message unless we set this app id
+        replica.setAppID(MobileWebApplication.APP_ID);
+
+        for (Connection con : currentNeighbors) {
+            if (!triedNeighbors.contains(con)) {
+                triedNeighbors.add(con);
+                int retVal = startTransfer(replica,con);
+                //We tried to this neighbor already, don't wanna do it again in the future -> remove it
+                if (retVal == RCV_OK) {
+                    return true; //Accepted the message, don't try others
+                }
+                /* In case retVal is != RCV_OK, something went wrong. We don't care and move on.
+                That peer has been added to the list of tried neighbors anyway. */
+            }
+        }
+        return false;
+    }
+
     private boolean tryOffloadToHotspots(Message m) {
         for (Connection con : currentHotspots) {
             int retVal = startTransfer(m, con);
@@ -130,6 +143,8 @@ public class OffloadingRouter extends ActiveRouter {
         return false;
     }
 
+    /*
+    OLD LOGIC, NOT USED ANYMORE
     private boolean tryMessageToPeers(Message m, List<Connection> peers) {
         //Replicating the original message, since we are playing around with the app ID
         Message replica = m.replicate();
@@ -147,13 +162,12 @@ public class OffloadingRouter extends ActiveRouter {
                 return true; //Accepted the message, don't try others
             }
             /* In case retVal is != RCV_OK, something went wrong. Maybe the neighbor went out of range.
-            We don't care and move on. That peer has been deleted from the neighbor list anyway. */
+            We don't care and move on. That peer has been deleted from the neighbor list anyway.
         }
         return false;
-    }
+    }*/
 
     private boolean tryMessageToInternet(Message m) {
-        DTNHost cellularTower = InfrastructureManager.getInstance().getCellularTower();
         for (Connection con : currentHotspots) {
             int retVal = startTransfer(m,con);
             if (retVal == RCV_OK) {
@@ -169,6 +183,8 @@ public class OffloadingRouter extends ActiveRouter {
         else {
             System.out.println("WARNING! No cellular connection at the moment");
         }
+        /*
+        DTNHost cellularTower = InfrastructureManager.getInstance().getCellularTower();
         for (NetworkInterface i : getHost().getInterfaces()) {
             //Trying to send over WLAN even with traditional routing, since this should
             // be the preferred method
@@ -190,7 +206,7 @@ public class OffloadingRouter extends ActiveRouter {
                     }
                 }
             }
-        }
+        }*/
         return false;
     }
 
