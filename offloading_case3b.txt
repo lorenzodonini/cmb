@@ -1,5 +1,8 @@
 # case 3: All cellular with WiFi offloading, within 300 seconds wait time
 
+# Increased TTL since our offloading time is higher
+Group.msgTtl = 8
+
 # group3 (pedestrians) specific settings, Cellular + WiFi
 Group3.groupID = p
 Group3.nrofHosts = 1

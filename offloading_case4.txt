@@ -1,8 +1,11 @@
 # case 4: Cellular with WiFi offloading and peer-to-peer caching
 
+# Increased TTL since our offloading time is higher
+Group.msgTtl = 8
+
 # group3 (pedestrians) specific settings, Cellular + WiFi
 Group3.groupID = p
-Group3.nrofHosts = 1
+Group3.nrofHosts = 2
 Group3.nrofInterfaces = 2
 Group3.nrofApplications = 1
 Group3.interface1 = cellularInterface
@@ -14,8 +17,8 @@ Group3.speed = 0.5,1.5
 # Routing settings
 OffloadingRouter.p2pEnabled = true
 OffloadingRouter.wifiOffloadEnabled = true
-# We can tweak this ofc, but we left it at 60 by default
-OffloadingRouter.offloadWaitTime = 60
+# We can tweak this ofc, but we left it at 300 by default (makes more sense)
+OffloadingRouter.offloadWaitTime = 300
 
 # Mobile application cache size
 mobileApplication.cacheSize = 10
