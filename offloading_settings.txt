@@ -124,3 +124,8 @@ GUI.UnderlayImage.scale = 4.75
 GUI.UnderlayImage.rotate = -0.015
 
 GUI.EventLogPanel.nrofEvents = 100
+
+# Report
+Report.nrofReports = 0
+Report.reportDir = reports
+Report.report1 = InternetResponseTimeReport
