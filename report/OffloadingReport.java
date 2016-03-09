@@ -37,10 +37,10 @@ public class OffloadingReport extends Report implements ApplicationListener {
         int totalRequests = 0;
         double totalBytes = 0;
         int p2pOffloadedRequests = 0, wifiOffloadedRequests = 0;
-        long p2pOffloadedBytes = 0, wifiOffloadedBytes = 0;
+        double p2pOffloadedBytes = 0, wifiOffloadedBytes = 0;
         int totalFailed = 0;
         int amount, offloaded1, offloaded2, failed;
-        long bytes, byteOffloaded1, byteOffloaded2;
+        double bytes, byteOffloaded1, byteOffloaded2;
         double percentage;
         double computed;
 
@@ -99,19 +99,19 @@ public class OffloadingReport extends Report implements ApplicationListener {
             sb.append("; Bytes: ");
             bytes = report.getTotalReceivedBytes();
             totalBytes += bytes;
-            sb.append(bytes);
+            sb.append((long)bytes);
             // P2P offloaded bytes
             p2pOffloadedBytes += byteOffloaded1;
             sb.append(", P2P: ");
-            sb.append(byteOffloaded1);
+            sb.append((long)byteOffloaded1);
             // WiFi offloaded bytes
             wifiOffloadedBytes += byteOffloaded2;
             sb.append(", WiFi: ");
-            sb.append(byteOffloaded2);
+            sb.append((long)byteOffloaded2);
             // Total offloaded bytes
             sb.append(", Total offloaded: ");
-            sb.append(byteOffloaded1 + byteOffloaded2);
-            offloadedBytes.add((double)(byteOffloaded1 + byteOffloaded2));
+            sb.append((long)(byteOffloaded1 + byteOffloaded2));
+            offloadedBytes.add(byteOffloaded1 + byteOffloaded2);
             // Percentage offloaded bytes
             percentage = computePercentage(bytes, byteOffloaded1 + byteOffloaded2);
             sb.append(", Percentage: ");
@@ -139,11 +139,11 @@ public class OffloadingReport extends Report implements ApplicationListener {
         sb.append("\nTotal Bytes: ");
         sb.append((long)totalBytes);
         sb.append(", P2P: ");
-        sb.append(p2pOffloadedBytes);
+        sb.append((long)p2pOffloadedBytes);
         sb.append(", WiFi: ");
-        sb.append(wifiOffloadedBytes);
+        sb.append((long)wifiOffloadedBytes);
         sb.append(", Total offloaded: ");
-        sb.append(p2pOffloadedBytes + wifiOffloadedBytes);
+        sb.append((long)p2pOffloadedBytes + wifiOffloadedBytes);
         percentage = computePercentage(totalBytes, p2pOffloadedBytes + wifiOffloadedBytes);
         sb.append(", Percentage: ");
         sb.append(format(percentage));
