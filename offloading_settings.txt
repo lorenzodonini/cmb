@@ -1,5 +1,5 @@
 ## Scenario settings
-Scenario.name = default_scenario
+Scenario.name = helsinki_offloading
 Scenario.simulateConnections = true
 Scenario.updateInterval = 0.1
 Scenario.endTime = 43200
@@ -16,7 +16,7 @@ highspeedInterface.transmitSpeed = 10M
 highspeedInterface.transmitRange = 10000
 
 cellularInterface.type = CellularInterface
-cellularInterface.transmitSpeed = 2.5M
+cellularInterface.transmitSpeed = 1.25M
 cellularInterface.transmitRange = 2500
 
 wlanInterface.type = WLANInterface
@@ -100,7 +100,7 @@ Events.nrof = 0
 ## Movement model settings
 MovementModel.rngSeed = 1
 MovementModel.worldSize = 4500, 3400
-MovementModel.warmup = 1000
+MovementModel.warmup = 3600
 
 
 ## Map based movement -movement model specific settings
@@ -126,6 +126,6 @@ GUI.UnderlayImage.rotate = -0.015
 GUI.EventLogPanel.nrofEvents = 100
 
 # Report
-Report.nrofReports = 0
+Report.nrofReports = 1
 Report.reportDir = reports
-Report.report1 = InternetResponseTimeReport
+Report.report1 = OffloadingReport

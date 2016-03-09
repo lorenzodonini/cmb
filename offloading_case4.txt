@@ -1,11 +1,12 @@
 # case 4: Cellular with WiFi offloading and peer-to-peer caching
+Scenario.endTime = 4800
 
 # Increased TTL since our offloading time is higher
 Group.msgTtl = 8
 
 # group3 (pedestrians) specific settings, Cellular + WiFi
 Group3.groupID = p
-Group3.nrofHosts = 2
+Group3.nrofHosts = 1
 Group3.nrofInterfaces = 2
 Group3.nrofApplications = 1
 Group3.interface1 = cellularInterface
