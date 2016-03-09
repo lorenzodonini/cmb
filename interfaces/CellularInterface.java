@@ -2,9 +2,10 @@ package interfaces;
 
 import applications.InfrastructureManager;
 import core.*;
+import routing.InfrastructureRouter;
+import routing.MessageRouter;
 
-public class CellularInterface extends SimpleBroadcastInterface {
-    private int cellularTowerAddress = -1;
+public class CellularInterface extends SimpleIpInterface {
 
     public CellularInterface(Settings s) {
         super(s);
@@ -20,19 +21,19 @@ public class CellularInterface extends SimpleBroadcastInterface {
     }
 
     @Override
-    public void update() {
-        super.update();
-        if (cellularTowerAddress < 0) {
-            cellularTowerAddress = InfrastructureManager.getInstance().getCellularTower().getAddress();
+    public void init(MessageRouter router) {
+        if (router instanceof InfrastructureRouter) {
+            InfrastructureManager.getInstance().setCellularTower(getHost());
         }
     }
 
     @Override
     public void connect(NetworkInterface anotherInterface) {
         if (isScanning()
-                && anotherInterface.getHost().getAddress() == cellularTowerAddress
+                && anotherInterface.getHost() == InfrastructureManager.getInstance().getCellularTower()
                 && anotherInterface.getHost().isRadioActive()
                 && !isConnected(anotherInterface)
+                && isWithinRange(anotherInterface)
                 && (this != anotherInterface)) {
             // new contact within range
             // connection speed is the lower one of the two speeds

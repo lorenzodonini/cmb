@@ -5,9 +5,10 @@ import core.CBRConnection;
 import core.Connection;
 import core.NetworkInterface;
 import core.Settings;
+import routing.InternetRouter;
+import routing.MessageRouter;
 
-public class InternetInterface extends SimpleBroadcastInterface {
-    private int internetNodeAddress = -1;
+public class InternetInterface extends SimpleIpInterface {
 
     public InternetInterface(Settings s) {
         super(s);
@@ -22,18 +23,19 @@ public class InternetInterface extends SimpleBroadcastInterface {
         return new InternetInterface(this);
     }
 
-    public void update() {
-        super.update();
-        if (internetNodeAddress < 0) {
-            internetNodeAddress = InfrastructureManager.getInstance().getInternetNode().getAddress();
+    @Override
+    public void init(MessageRouter router) {
+        if (router instanceof InternetRouter) {
+            InfrastructureManager.getInstance().setInternetNode(getHost());
         }
     }
 
     @Override
     public void connect(NetworkInterface anotherInterface) {
-        if (anotherInterface.getHost().getAddress() == internetNodeAddress
-                && getHost().getAddress() != internetNodeAddress
-                && !isConnected(anotherInterface)) {
+        if (anotherInterface.getHost() == InfrastructureManager.getInstance().getInternetNode()
+                && getHost() != InfrastructureManager.getInstance().getInternetNode()
+                && !isConnected(anotherInterface)
+                && isWithinRange(anotherInterface)) {
             int conSpeed = anotherInterface.getTransmitSpeed(this);
             if (conSpeed > this.transmitSpeed) {
                 conSpeed = this.transmitSpeed;

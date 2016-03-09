@@ -47,12 +47,16 @@ public class InfrastructureManager {
 
     public DTNHost getInternetNode() {
         if (internetNode == null) {
-            findInternetNoe();
+            //findInternetNode();
         }
         return internetNode;
     }
 
-    private void findInternetNoe() {
+    public void setInternetNode(DTNHost internet) {
+        internetNode = internet;
+    }
+
+    /*private void findInternetNode() {
         List<DTNHost> hosts = SimScenario.getInstance().getHosts();
         for (DTNHost host : hosts) {
             if (host.getRouter() instanceof InternetRouter) {
@@ -60,16 +64,20 @@ public class InfrastructureManager {
                 return;
             }
         }
-    }
+    }*/
 
     public DTNHost getCellularTower() {
         if (cellularTower == null) {
-            findCellularTower();
+            //findCellularTower();
         }
         return cellularTower;
     }
 
-    private void findCellularTower() {
+    public void setCellularTower(DTNHost tower) {
+        cellularTower = tower;
+    }
+
+    /*private void findCellularTower() {
         List<DTNHost> hosts = SimScenario.getInstance().getHosts();
         for (DTNHost host : hosts) {
             if (host.getInterfaces().size() == 2
@@ -79,7 +87,7 @@ public class InfrastructureManager {
                 return;
             }
         }
-    }
+    }*/
 
     public Set<DTNHost> getWLANHotspots() {
         return wlanHotspots;
