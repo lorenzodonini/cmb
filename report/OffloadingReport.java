@@ -143,7 +143,7 @@ public class OffloadingReport extends Report implements ApplicationListener {
         sb.append(", WiFi: ");
         sb.append((long)wifiOffloadedBytes);
         sb.append(", Total offloaded: ");
-        sb.append((long)p2pOffloadedBytes + wifiOffloadedBytes);
+        sb.append((long)(p2pOffloadedBytes + wifiOffloadedBytes));
         percentage = computePercentage(totalBytes, p2pOffloadedBytes + wifiOffloadedBytes);
         sb.append(", Percentage: ");
         sb.append(format(percentage));
