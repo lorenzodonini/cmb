@@ -10,9 +10,14 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 public class InternetApplication extends Application {
-    private final static String NS_PAGE_COUNT = "pageCount";
-    private final static String NS_MIN_SIZE = "minSize";
-    private final static String NS_MAX_SIZE = "maxSize";
+
+    //Settings
+    /** Setting name for the total amount of web pages that need to be offered to the users */
+    private final static String S_PAGE_COUNT = "pageCount";
+    /** Setting name for the minimum size of a web page. This represents the size in bytes of a response. */
+    private final static String S_MIN_SIZE = "minSize";
+    /** Setting name for the maximum size of a web page. This represents the size in bytes of a response. */
+    private final static String S_MAX_SIZE = "maxSize";
 
     /** Application ID */
     public static final String APP_ID = "tum.cmb.team4.InternetApplication";
@@ -20,13 +25,17 @@ public class InternetApplication extends Application {
     private Map<ActiveRouter, List<Double>> pendingRequests;
     private Map<ActiveRouter, List<WebPage>> finishedRequests;
 
+    /** Instance of a {@link WebPageDb}. This is actually singleton and could be accessed statically
+     * for every call, but a direct reference is stored here as an optimization.
+     * This is because the internet application has to respond to all mobile nodes and this database,
+     * containing all the available web pages, needs to be accessed by the application on each request. */
     private WebPageDb internet;
 
     public InternetApplication(Settings s) {
         pendingRequests = new HashMap<>();
         finishedRequests = new HashMap<>();
 
-        WebPageDb.initWebPageDb(s.getInt(NS_PAGE_COUNT), s.getInt(NS_MIN_SIZE), s.getInt(NS_MAX_SIZE));
+        WebPageDb.initWebPageDb(s.getInt(S_PAGE_COUNT), s.getInt(S_MIN_SIZE), s.getInt(S_MAX_SIZE));
         internet = WebPageDb.getInstance();
         super.setAppID(APP_ID);
     }
@@ -71,73 +80,6 @@ public class InternetApplication extends Application {
     public void update(DTNHost host) {
         //"The internet" is passive and doesn't create messages unless explicitly requested to.
         // See the handle() method.
-    }
-
-    private void processRequests()
-    {
-        double time = SimClock.getTime();
-
-        Iterator<Map.Entry<ActiveRouter, List<Double>>> requestsIt = pendingRequests.entrySet().iterator();
-
-        while(requestsIt.hasNext()) {
-            // iterate through all pending requests of each router
-
-            Map.Entry<ActiveRouter, List<Double>> requestsEntry = requestsIt.next();
-            ActiveRouter currentRouter = requestsEntry.getKey();
-
-            Iterator<Double> requestIt = requestsEntry.getValue().iterator();
-            while(requestIt.hasNext()) {
-                // iterate through each request of the current router (of outer loop)
-
-                if(time >= requestIt.next()) {
-                    // request is finished, remove from pending
-                    requestIt.remove();
-
-                    // add response to finished
-                    List<WebPage> responses = finishedRequests.get(currentRouter);
-                    if(responses == null) {
-                        responses = new LinkedList<>();
-                        finishedRequests.put(currentRouter, responses);
-                    }
-                    responses.add(internet.getRandomPage());
-                }
-            }
-
-            if(requestsEntry.getValue().isEmpty()) {
-                // all requests for this router have finished, remove router from request map
-                requestIt.remove();
-            }
-        }
-    }
-
-    private double getRandomRequestTime()
-    {
-        return (double)ThreadLocalRandom.current().nextInt(20, 100) / 1000d;
-    }
-
-
-    // add a request with this function
-    public void requestWebpage(ActiveRouter router)
-    {
-        List<Double> routerRequests = pendingRequests.get(router);
-
-        if(routerRequests == null) {
-            routerRequests = new LinkedList<>();
-            pendingRequests.put(router, routerRequests);
-        }
-
-        // add request together with the time when it's going to be finished
-        routerRequests.add(SimClock.getTime() + getRandomRequestTime());
-    }
-
-    // get finished responses, might return null if none are finished
-    public List<WebPage> getResponses(ActiveRouter router)
-    {
-        processRequests();
-
-        List<WebPage> responses = finishedRequests.get(router);
-        finishedRequests.remove(router);
-        return responses;
     }
 
     @Override
