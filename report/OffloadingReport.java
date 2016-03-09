@@ -7,9 +7,22 @@ import java.util.*;
 
 public class OffloadingReport extends Report implements ApplicationListener {
     private Map<DTNHost, SingleNodeReport> mNodes;
+    private boolean bDropFailedRequests;
+    private boolean bDropSelfCachedRequests;
+    private boolean bReportRawData;
+
+    private static final String S_DROP_FAILED_REQUESTS = "dropFailedRequests";
+    private static final String S_DROP_SELF_CACHED_REQUESTS = "dropSelfCachedRequests";
+    private static final String S_REPORT_RAW_DATA = "reportRawData";
 
     public OffloadingReport() {
+        super();
         mNodes = new HashMap<>();
+
+        Settings s = getSettings();
+        bDropFailedRequests = s.getBoolean(S_DROP_FAILED_REQUESTS,true);
+        bDropSelfCachedRequests = s.getBoolean(S_DROP_SELF_CACHED_REQUESTS,false);
+        bReportRawData = s.getBoolean(S_REPORT_RAW_DATA,true);
     }
 
     @Override
@@ -17,22 +30,30 @@ public class OffloadingReport extends Report implements ApplicationListener {
         List<Double> responseTimes = new ArrayList<>();
         List<Double> latencies = new ArrayList<>();
         List<Double> offloadedRequests = new ArrayList<>();
+        List<Double> offloadedRequestsPercentage = new ArrayList<>();
         List<Double> offloadedBytes = new ArrayList<>();
+        List<Double> offloadedBytesPercentage = new ArrayList<>();
         List<MessageReport> reports;
-        int totalRequests = 0, totalBytes = 0;
+        int totalRequests = 0;
+        double totalBytes = 0;
         int p2pOffloadedRequests = 0, wifiOffloadedRequests = 0;
         int p2pOffloadedBytes = 0, wifiOffloadedBytes = 0;
-        int amount, offloaded1, offloaded2;
+        int totalFailed = 0;
+        int amount, offloaded1, offloaded2, failed;
         long bytes, byteOffloaded1, byteOffloaded2;
         double percentage;
         double computed;
 
         StringBuilder sb = new StringBuilder();
 
+        write("Stats for scenario " + getScenarioName());
+        //REPORTING RAW DATA
+        if (bReportRawData) {
+            reportRawData(sb);
+        }
         //REPORTING OFFLOADING
         //Also storing some additional data in the process
-        write("Stats for scenario " + getScenarioName());
-        write("Offloading:");
+        write("\nOFFLOADING:");
         for (DTNHost host : mNodes.keySet()) {
             SingleNodeReport report = mNodes.get(host);
             responseTimes.addAll(report.getResponseTimes());
@@ -51,34 +72,39 @@ public class OffloadingReport extends Report implements ApplicationListener {
             p2pOffloadedRequests += offloaded1;
             sb.append(", P2P: ");
             sb.append(offloaded1);
+            byteOffloaded1 = countReceivedBytes(reports); //p2p offloaded bytes
             // WiFi offloaded requests
             reports = report.getWifiOffloadedReports();
             offloaded2 = reports.size();
             wifiOffloadedRequests += offloaded2;
             sb.append(", WiFi: ");
             sb.append(offloaded2);
+            byteOffloaded2 = countReceivedBytes(reports); //wifi offloaded bytes
             // Total offloaded requests
             sb.append(", Total offloaded: ");
             sb.append(offloaded1 + offloaded2);
             offloadedRequests.add((double)(offloaded1 + offloaded2));
             // Percentage offloaded requests
-            //amount : 100 = (offloaded1 + offloaded2) : x
             percentage = computePercentage(amount, offloaded1 + offloaded2);
             sb.append(", Percentage: ");
             sb.append(format(percentage));
+            offloadedRequestsPercentage.add(percentage);
+            // Failed requests
+            sb.append("%, Failed requests: ");
+            failed = report.getFailedRequests();
+            totalFailed += failed;
+            sb.append(failed);
 
             // Total amount of bytes
-            sb.append("%; Bytes: ");
+            sb.append("; Bytes: ");
             bytes = report.getTotalReceivedBytes();
             totalBytes += bytes;
             sb.append(bytes);
             // P2P offloaded bytes
-            byteOffloaded1 = countReceivedBytes(reports);
             p2pOffloadedBytes += byteOffloaded1;
             sb.append(", P2P: ");
             sb.append(byteOffloaded1);
             // WiFi offloaded bytes
-            byteOffloaded2 = countReceivedBytes(reports);
             wifiOffloadedBytes += byteOffloaded2;
             sb.append(", WiFi: ");
             sb.append(byteOffloaded2);
@@ -91,12 +117,13 @@ public class OffloadingReport extends Report implements ApplicationListener {
             sb.append(", Percentage: ");
             sb.append(format(percentage));
             sb.append("%");
+            offloadedBytesPercentage.add(percentage);
             // Writing line
             write(sb.toString());
             sb.setLength(0);
         }
         // Total report
-        sb.append("\nTotal requests: ");
+        sb.append("\nTotal Requests: ");
         sb.append(totalRequests);
         sb.append(", P2P: ");
         sb.append(p2pOffloadedRequests);
@@ -107,8 +134,10 @@ public class OffloadingReport extends Report implements ApplicationListener {
         percentage = computePercentage(totalRequests, p2pOffloadedRequests + wifiOffloadedRequests);
         sb.append(", Percentage: ");
         sb.append(format(percentage));
-        sb.append("%\tTotal bytes: ");
-        sb.append(totalBytes);
+        sb.append("%, Failed: ");
+        sb.append(totalFailed);
+        sb.append("\nTotal Bytes: ");
+        sb.append((long)totalBytes);
         sb.append(", P2P: ");
         sb.append(p2pOffloadedBytes);
         sb.append(", WiFi: ");
@@ -117,21 +146,22 @@ public class OffloadingReport extends Report implements ApplicationListener {
         sb.append(p2pOffloadedBytes + wifiOffloadedBytes);
         percentage = computePercentage(totalBytes, p2pOffloadedBytes + wifiOffloadedBytes);
         sb.append(", Percentage: ");
-        sb.append(percentage);
+        sb.append(format(percentage));
         sb.append("%");
         write(sb.toString());
         sb.setLength(0);
 
         //REPORTING OFFLOADED REQUESTS
         Collections.sort(offloadedRequests);
-        write("\nOffloaded requests per node:");
+        write("\nOFFLOADED REQUESTS PER NODE:");
+        sb.append("ABSOLUTE - ");
         sb.append("Mean: ");
         computed = computeMeanValue(offloadedRequests);
         sb.append(format(computed));
         sb.append(", Median: ");
         computed = computeMedianValue(offloadedRequests);
         sb.append(format(computed));
-        sb.append(", 95% percentile: ");
+        sb.append(", 95%tile: ");
         computed = compute95Percentile(offloadedRequests);
         sb.append(format(computed));
         sb.append(", Min: ");
@@ -140,19 +170,37 @@ public class OffloadingReport extends Report implements ApplicationListener {
         sb.append(", Max: ");
         computed = computeMaxValue(offloadedRequests);
         sb.append(format(computed));
+        sb.append("\nPERCENTAGE - ");
+        sb.append("Mean: ");
+        computed = computeMeanValue(offloadedRequestsPercentage);
+        sb.append(format(computed));
+        sb.append("%, Median: ");
+        computed = computeMedianValue(offloadedRequestsPercentage);
+        sb.append(format(computed));
+        sb.append("%, 95%tile: ");
+        computed = compute95Percentile(offloadedRequestsPercentage);
+        sb.append(format(computed));
+        sb.append("%, Min: ");
+        computed = computeMinValue(offloadedRequestsPercentage);
+        sb.append(format(computed));
+        sb.append("%, Max: ");
+        computed = computeMaxValue(offloadedRequestsPercentage);
+        sb.append(format(computed));
+        sb.append("%");
         write(sb.toString());
         sb.setLength(0);
 
         //REPORTING OFFLOADED BYTES
         Collections.sort(offloadedBytes);
-        write("\nOffloaded bytes per node:");
+        write("\nOFFLOADED BYTES PER NODE:");
+        sb.append("ABSOLUTE - ");
         sb.append("Mean: ");
         computed = computeMeanValue(offloadedBytes);
         sb.append(format(computed));
         sb.append(", Median: ");
         computed = computeMedianValue(offloadedBytes);
         sb.append(format(computed));
-        sb.append(", 95% percentile: ");
+        sb.append(", 95%tile: ");
         computed = compute95Percentile(offloadedBytes);
         sb.append(format(computed));
         sb.append(", Min: ");
@@ -161,19 +209,36 @@ public class OffloadingReport extends Report implements ApplicationListener {
         sb.append(", Max: ");
         computed = computeMaxValue(offloadedBytes);
         sb.append(format(computed));
+        sb.append("\nPERCENTAGE - ");
+        sb.append("Mean: ");
+        computed = computeMeanValue(offloadedBytesPercentage);
+        sb.append(format(computed));
+        sb.append("%, Median: ");
+        computed = computeMedianValue(offloadedBytesPercentage);
+        sb.append(format(computed));
+        sb.append("%, 95%tile: ");
+        computed = compute95Percentile(offloadedBytesPercentage);
+        sb.append(format(computed));
+        sb.append("%, Min: ");
+        computed = computeMinValue(offloadedBytesPercentage);
+        sb.append(format(computed));
+        sb.append("%, Max: ");
+        computed = computeMaxValue(offloadedBytesPercentage);
+        sb.append(format(computed));
+        sb.append("%");
         write(sb.toString());
         sb.setLength(0);
 
         //REPORTING RESPONSE TIMES
         Collections.sort(responseTimes);
-        write("\n\nResponse times:");
+        write("\n\nRESPONSE TIMES:");
         sb.append("Mean: ");
         computed = computeMeanValue(responseTimes);
         sb.append(format(computed));
         sb.append(", Median: ");
         computed = computeMedianValue(responseTimes);
         sb.append(format(computed));
-        sb.append(", 95% percentile: ");
+        sb.append(", 95%tile: ");
         computed = compute95Percentile(responseTimes);
         sb.append(format(computed));
         sb.append(", Min: ");
@@ -187,14 +252,14 @@ public class OffloadingReport extends Report implements ApplicationListener {
 
         //REPORTING LATENCIES
         Collections.sort(latencies);
-        write("\nLatencies:");
+        write("\nWEBPAGE DOWNLOAD TIMES:");
         sb.append("Mean: ");
         computed = computeMeanValue(latencies);
         sb.append(format(computed));
         sb.append(", Median: ");
         computed = computeMedianValue(latencies);
         sb.append(format(computed));
-        sb.append(", 95% percentile: ");
+        sb.append(", 95%tile: ");
         computed = compute95Percentile(latencies);
         sb.append(format(computed));
         sb.append(", Min: ");
@@ -208,6 +273,18 @@ public class OffloadingReport extends Report implements ApplicationListener {
         super.done();
     }
 
+    private void reportRawData(StringBuilder sb) {
+        write("RAW DATA:");
+        write("Host,M_ID,RespTime,Download_time,Bytes,Type,P2PAttempts\t\t(Types: 1=3G, 2=WiFi, 3=WiFi_offloaded, 4=P2P)");
+        for (DTNHost host : mNodes.keySet()) {
+            SingleNodeReport report = mNodes.get(host);
+            sb.append(host.toString());
+            sb.append(",");
+            report.reportRaw(sb);
+            sb.setLength(0);
+        }
+    }
+
     @Override
     public void gotEvent(String event, Object params, Application app, DTNHost host) {
         if (isWarmup()) {
@@ -217,7 +294,7 @@ public class OffloadingReport extends Report implements ApplicationListener {
         //This listener handles multiple events
         if (MobileWebApplication.E_RESP_RECEIVED.equals(event)) {
             if (report != null) {
-                report.setResponse((Message)params);
+                report.addResponse((Message)params);
             }
             //If report == null, something went wrong. This should never happen
         }
@@ -312,8 +389,12 @@ public class OffloadingReport extends Report implements ApplicationListener {
         return (x * 100d) / total;
     }
 
+    private double roundTo2Decimals(double value) {
+        return (double)Math.round(value * 100) / 100;
+    }
+
     private double compute95Percentile(List<Double> values) {
-        Map<Double, Integer> dataSet = new HashMap<>();
+        Map<Double, Integer> dataSet = new TreeMap<>();
         Integer val;
         int sum = 0;
         double previous = 0;
@@ -335,12 +416,13 @@ public class OffloadingReport extends Report implements ApplicationListener {
                 //Found the approximate percentile. Computing the correct one now
                 for (int i=1; i<=val; i++) {
                     if (sum + i >= 0.95 * values.size()) {
-                        percentile = d + ((d - previous) / val) * i;
+                        percentile = previous + ((d - previous) / val) * i;
                         break;
                     }
                 }
                 break;
             }
+            sum += val;
             previous = d;
         }
 
@@ -365,7 +447,7 @@ public class OffloadingReport extends Report implements ApplicationListener {
             report.setRoutingStartTime(routingStartTime);
         }
 
-        public void setResponse(Message resp) {
+        public void addResponse(Message resp) {
             Message req = resp.getRequest();
             if (req == null) {
                 return;
@@ -380,27 +462,36 @@ public class OffloadingReport extends Report implements ApplicationListener {
         }
 
         public List<Double> getLatencies() {
-            List<Double> responseTimes = new ArrayList<>();
+            List<Double> latencies = new ArrayList<>();
             for (MessageReport report : mRequests.values()) {
-                responseTimes.add(report.getLatency());
+                if (report.getResponse() == null && bDropFailedRequests) {
+                    continue;
+                }
+                latencies.add(roundTo2Decimals(report.getLatency()));
             }
-            Collections.sort(responseTimes);
-            return responseTimes;
+            Collections.sort(latencies);
+            return latencies;
         }
 
         public List<Double> getResponseTimes() {
-            List<Double> elapsedTimes = new ArrayList<>();
+            List<Double> responseTimes = new ArrayList<>();
             for (MessageReport report : mRequests.values()) {
-                elapsedTimes.add(report.getResponseTime());
+                if (report.getResponse() == null && bDropFailedRequests) {
+                    continue;
+                }
+                responseTimes.add(roundTo2Decimals(report.getResponseTime()));
             }
-            Collections.sort(elapsedTimes);
-            return elapsedTimes;
+            Collections.sort(responseTimes);
+            return responseTimes;
         }
 
         public List<MessageReport> getWifiOffloadedReports() {
             List<MessageReport> offloaded = new ArrayList<>();
             for (MessageReport report : mRequests.values()) {
                 if (report.getType() == MobileWebApplication.REQ_TYPE_OFFLOAD) {
+                    if (report.getResponse() == null && bDropFailedRequests) {
+                        continue;
+                    }
                     offloaded.add(report);
                 }
             }
@@ -411,6 +502,9 @@ public class OffloadingReport extends Report implements ApplicationListener {
             List<MessageReport> offloaded = new ArrayList<>();
             for (MessageReport report : mRequests.values()) {
                 if (report.getType() == MobileWebApplication.REQ_TYPE_P2P) {
+                    if (report.getResponse() == null && bDropFailedRequests) {
+                        continue;
+                    }
                     offloaded.add(report);
                 }
             }
@@ -420,22 +514,45 @@ public class OffloadingReport extends Report implements ApplicationListener {
         public long getTotalReceivedBytes() {
             long bytes = 0;
             for (MessageReport report : mRequests.values()) {
+                if (report.getResponse() == null && bDropFailedRequests) {
+                    continue;
+                }
                 bytes += report.getReceivedBytes();
             }
             return bytes;
         }
 
-        public List<Integer> getBytesReceived() {
-            List<Integer> bytesReceived = new ArrayList<>();
-            for (MessageReport report : mRequests.values()) {
-                bytesReceived.add(report.getReceivedBytes());
+        public int getAmountOfRequests() {
+            if (!bDropFailedRequests) {
+                return mRequests.size();
             }
-            Collections.sort(bytesReceived);
-            return bytesReceived;
+            else {
+                return mRequests.size() - getFailedRequests();
+            }
         }
 
-        public int getAmountOfRequests() {
-            return mRequests.size();
+        public int getFailedRequests() {
+            int failed = 0;
+            for (MessageReport report : mRequests.values()) {
+                if (report.getResponse() == null) {
+                    failed++;
+                }
+            }
+            return failed;
+        }
+
+        public void reportRaw(StringBuilder sb) {
+            int length = sb.length();
+            for (String id : mRequests.keySet()) {
+                MessageReport rep = mRequests.get(id);
+                if (rep.getResponse() == null && bDropFailedRequests) {
+                    continue;
+                }
+                sb.append(id);
+                sb.append(",");
+                mRequests.get(id).reportRaw(sb);
+                sb.setLength(length);
+            }
         }
     }
 
@@ -506,6 +623,19 @@ public class OffloadingReport extends Report implements ApplicationListener {
 
         public void setRoutingStartTime(double time) {
             routingStartTime = time;
+        }
+
+        public void reportRaw(StringBuilder sb) {
+            sb.append(format(getResponseTime()));
+            sb.append(",");
+            sb.append(format(getLatency()));
+            sb.append(",");
+            sb.append(getReceivedBytes());
+            sb.append(",");
+            sb.append(getType());
+            sb.append(",");
+            sb.append(getP2PAttempts());
+            write(sb.toString());
         }
     }
 }
