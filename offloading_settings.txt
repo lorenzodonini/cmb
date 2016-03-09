@@ -4,17 +4,8 @@ Scenario.simulateConnections = true
 Scenario.updateInterval = 0.1
 Scenario.endTime = 43200
 
-# "Bluetooth" interface for all nodes
-btInterface.type = SimpleBroadcastInterface
-# Transmit speed of 2 Mbps = 250kBps
-btInterface.transmitSpeed = 250k
-btInterface.transmitRange = 10
 
-# High speed, long range, interface for group 4
-highspeedInterface.type = SimpleBroadcastInterface
-highspeedInterface.transmitSpeed = 10M
-highspeedInterface.transmitRange = 10000
-
+# Interfaces
 cellularInterface.type = CellularInterface
 cellularInterface.transmitSpeed = 1.25M
 cellularInterface.transmitRange = 2500
@@ -29,7 +20,7 @@ internetInterface.transmitRange = 10000
 
 # Application specific settings
 internetApplication.type = InternetApplication
-internetApplication.pageCount = 100
+internetApplication.pageCount = 10k
 internetApplication.minSize = 300k
 internetApplication.maxSize = 3M
 
@@ -98,9 +89,7 @@ Group3.offloadWaitTime = 0
 Events.nrof = 0
 
 ## Movement model settings
-MovementModel.rngSeed = 1
 MovementModel.worldSize = 4500, 3400
-MovementModel.warmup = 3600
 
 
 ## Map based movement -movement model specific settings
@@ -129,3 +118,9 @@ GUI.EventLogPanel.nrofEvents = 100
 Report.nrofReports = 1
 Report.reportDir = reports
 Report.report1 = OffloadingReport
+
+OffloadingReport.warmup = 3600
+OffloadingReport.precision = 2
+OffloadingReport.dropFailedRequests = true
+OffloadingReport.dropSelfCachedRequests = false
+OffloadingReport.reportRawData = true
