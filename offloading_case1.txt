@@ -3,7 +3,7 @@ Group.msgTtl = 2
 
 # group3 (pedestrians) specific settings, Cellular only
 Group3.groupID = pc
-Group3.nrofHosts = 200
+Group3.nrofHosts = 100
 Group3.nrofInterfaces = 1
 Group3.nrofApplications = 1
 Group3.interface1 = cellularInterface
@@ -13,7 +13,7 @@ Group3.speed = 0.5,1.5
 
 # group4 (pedestrians) specific settings, WiFi only
 Group4.groupID = pw
-Group4.nrofHosts = 200
+Group4.nrofHosts = 100
 Group4.nrofInterfaces = 1
 Group4.nrofApplications = 1
 Group4.interface1 = wlanInterface
