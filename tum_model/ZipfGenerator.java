@@ -6,7 +6,7 @@ package tum_model;
 import java.util.Random;
 
 public class ZipfGenerator {
-    private Random rnd = new Random(System.currentTimeMillis());
+    private Random rnd = new Random();
     private int size;
     private double skew;
     private double bottom = 0;
