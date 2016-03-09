@@ -225,7 +225,7 @@ public class OffloadingRouter extends ActiveRouter {
             if (InfrastructureManager.getInstance().isWLANHotspot(con.getOtherNode(getHost()))) {
                 currentHotspots.add(con);
             }
-            else if (con.getOtherInterface(getWLANInterface()) instanceof WLANInterface) {
+            else if (con.getOtherInterface(getWLANInterface()) instanceof WLANInterface && p2pOffloadingEnabled) {
                 currentNeighbors.add(con);
             }
             else if (InfrastructureManager.getInstance().getCellularTower() == con.getOtherNode(getHost())) {
@@ -236,7 +236,7 @@ public class OffloadingRouter extends ActiveRouter {
             if (InfrastructureManager.getInstance().isWLANHotspot(con.getOtherNode(getHost()))) {
                 currentHotspots.remove(con);
             }
-            else if (con.getOtherInterface(getWLANInterface()) instanceof WLANInterface) {
+            else if (con.getOtherInterface(getWLANInterface()) instanceof WLANInterface && p2pOffloadingEnabled) {
                 currentNeighbors.remove(con);
             }
             else if (InfrastructureManager.getInstance().getCellularTower() == con.getOtherNode(getHost())) {
