@@ -2,7 +2,7 @@
 
 # group3 (pedestrians) specific settings, Cellular + WiFi
 Group3.groupID = p
-Group3.nrofHosts = 1
+Group3.nrofHosts = 200
 Group3.nrofInterfaces = 2
 Group3.nrofApplications = 1
 Group3.interface1 = cellularInterface
