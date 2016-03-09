@@ -1,6 +1,9 @@
 package routing;
 
 import core.*;
+import interfaces.SimpleIpInterface;
+
+import java.util.List;
 
 public class InternetRouter extends ActiveRouter {
 
@@ -10,6 +13,16 @@ public class InternetRouter extends ActiveRouter {
 
     public InternetRouter(InternetRouter other) {
         super(other);
+    }
+
+    @Override
+    public void init(DTNHost host, List<MessageListener> mListeners) {
+        super.init(host, mListeners);
+        for (NetworkInterface ni : getHost().getInterfaces()) {
+            if (ni instanceof SimpleIpInterface) {
+                ((SimpleIpInterface)ni).init(this);
+            }
+        }
     }
 
     @Override

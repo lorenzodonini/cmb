@@ -2,10 +2,10 @@ package routing;
 
 import applications.InfrastructureManager;
 import core.*;
+import interfaces.SimpleIpInterface;
 
-/**
- * Created by lorenzodonini on 20/01/16.
- */
+import java.util.List;
+
 public class InfrastructureRouter extends ActiveRouter {
 
     public InfrastructureRouter(Settings s) {
@@ -14,6 +14,16 @@ public class InfrastructureRouter extends ActiveRouter {
 
     public InfrastructureRouter(InfrastructureRouter other) {
         super(other);
+    }
+
+    @Override
+    public void init(DTNHost host, List<MessageListener> mListeners) {
+        super.init(host, mListeners);
+        for (NetworkInterface ni : getHost().getInterfaces()) {
+            if (ni instanceof SimpleIpInterface) {
+                ((SimpleIpInterface)ni).init(this);
+            }
+        }
     }
 
     @Override

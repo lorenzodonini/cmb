@@ -3,6 +3,7 @@ package routing;
 import applications.InfrastructureManager;
 import applications.MobileWebApplication;
 import core.*;
+import interfaces.SimpleIpInterface;
 import interfaces.WLANInterface;
 
 import java.util.*;
@@ -14,6 +15,8 @@ public class OffloadingRouter extends ActiveRouter {
     private List<Connection> currentHotspots;
     private Set<Connection> currentNeighbors;
     private Connection currentCellularTower;
+
+    //Settings
     private static final String S_P2P_ENABLED = "p2pEnabled";
     private static final String S_OFFLOAD_ENABLED = "wifiOffloadEnabled";
     private static final String S_OFFLOAD_WAIT_TIME = "offloadWaitTime";
@@ -46,6 +49,16 @@ public class OffloadingRouter extends ActiveRouter {
     }
 
     @Override
+    public void init(DTNHost host, List<MessageListener> mListeners) {
+        super.init(host, mListeners);
+        for (NetworkInterface ni : getHost().getInterfaces()) {
+            if (ni instanceof SimpleIpInterface) {
+                ((SimpleIpInterface)ni).init(this);
+            }
+        }
+    }
+
+    @Override
     public void update() {
         super.update();
 
@@ -68,13 +81,6 @@ public class OffloadingRouter extends ActiveRouter {
 
         for (Message m : messages) {
             double routeStartTime = m.getCreationTime();
-            /*int routeStartTime = currentTime;
-            if (m.getProperty(PROP_ROUTE_TIME_START) == null) {
-                m.addProperty(PROP_ROUTE_TIME_START, routeStartTime);
-            }
-            else {
-                routeStartTime = (int)m.getProperty(PROP_ROUTE_TIME_START);
-            }*/
 
             //P2P offloading
             if (p2pOffloadingEnabled) {
@@ -124,6 +130,7 @@ public class OffloadingRouter extends ActiveRouter {
                 int retVal = startTransfer(replica,con);
                 //We tried to this neighbor already, don't wanna do it again in the future -> remove it
                 if (retVal == RCV_OK) {
+                    notifyAppListeners(MobileWebApplication.E_REQ_SENT_P2P,new Object[] {m,SimClock.getTime()});
                     return true; //Accepted the message, don't try others
                 }
                 /* In case retVal is != RCV_OK, something went wrong. We don't care and move on.
@@ -137,6 +144,7 @@ public class OffloadingRouter extends ActiveRouter {
         for (Connection con : currentHotspots) {
             int retVal = startTransfer(m, con);
             if (retVal == RCV_OK) {
+                notifyAppListeners(MobileWebApplication.E_REQ_SENT_OFFLOADED,new Object[] {m,SimClock.getTime()});
                 return true; //Accepted the message, don't try others
             }
         }
@@ -169,48 +177,26 @@ public class OffloadingRouter extends ActiveRouter {
 
     private boolean tryMessageToInternet(Message m) {
         for (Connection con : currentHotspots) {
+            //Trying over WiFi first, by default
             int retVal = startTransfer(m,con);
             if (retVal == RCV_OK) {
+                notifyAppListeners(MobileWebApplication.E_REQ_SENT_WIFI,new Object[] {m,SimClock.getTime()});
                 return true; //Accepted the message, don't try others
             }
         }
         if (currentCellularTower != null) {
+            //Trying over 3G
             int retVal = startTransfer(m,currentCellularTower);
             if (retVal == RCV_OK) {
+                notifyAppListeners(MobileWebApplication.E_REQ_SENT_CELLULAR,new Object[] {m,SimClock.getTime()});
                 return true; //Accepted the message, don't try others
             }
         }
-        else {
-            System.out.println("WARNING! No cellular connection at the moment");
-        }
-        /*
-        DTNHost cellularTower = InfrastructureManager.getInstance().getCellularTower();
-        for (NetworkInterface i : getHost().getInterfaces()) {
-            //Trying to send over WLAN even with traditional routing, since this should
-            // be the preferred method
-            if (i instanceof WLANInterface) {
-                for (Connection con : currentHotspots) {
-                    int retVal = startTransfer(m,con);
-                    if (retVal == RCV_OK) {
-                        return true; //Accepted the message, don't try others
-                    }
-                }
-            }
-            else if (i instanceof CellularInterface) {
-                for (Connection con : getConnections()) {
-                    if (con.getOtherNode(getHost()) == cellularTower) {
-                        int retVal = startTransfer(m,con);
-                        if (retVal == RCV_OK) {
-                            return true; //Accepted the message, don't try others
-                        }
-                    }
-                }
-            }
-        }*/
+        //If none of the above work, it means there is currently not connection at all
         return false;
     }
 
-    private List<Connection> getWifiNeighbors() {
+    /*private List<Connection> getWifiNeighbors() {
         List<Connection> neighbors = new LinkedList<>();
         InfrastructureManager infrastructure = InfrastructureManager.getInstance();
         DTNHost host = getHost();
@@ -229,7 +215,7 @@ public class OffloadingRouter extends ActiveRouter {
             }
         }
         return neighbors;
-    }
+    }*/
 
     @Override
     public void changedConnection(Connection con) {
@@ -266,6 +252,13 @@ public class OffloadingRouter extends ActiveRouter {
             }
         }
         return null;
+    }
+
+    private void notifyAppListeners(String event, Object params) {
+        DTNHost host = getHost();
+        for (Application a : getApplications(MobileWebApplication.APP_ID)) {
+            a.sendEventToListeners(event,params,host);
+        }
     }
 
     /*@Override
@@ -365,16 +358,6 @@ public class OffloadingRouter extends ActiveRouter {
     private Message routeToPeer(Message m, WLANInterface wi) {
         //Send message to all known connections?! Besides WiFi router maybe?!
         return m;
-    }*/
-
-    //TODO: to remove if not needed anymore
-    /*@Override
-    public boolean createNewMessage(Message m) {
-        //Adding the requested message ID property
-        int randPage = WebPageDb.getInstance().getRandomPageId();
-        m.addProperty(WebPageDb.WEB_REQUESTED_ID_PROPERTY, randPage);
-        m.setAppID(InternetApplication.APP_ID);
-        return super.createNewMessage(m);
     }*/
 
     @Override
