@@ -37,7 +37,7 @@ public class OffloadingReport extends Report implements ApplicationListener {
         int totalRequests = 0;
         double totalBytes = 0;
         int p2pOffloadedRequests = 0, wifiOffloadedRequests = 0;
-        int p2pOffloadedBytes = 0, wifiOffloadedBytes = 0;
+        long p2pOffloadedBytes = 0, wifiOffloadedBytes = 0;
         int totalFailed = 0;
         int amount, offloaded1, offloaded2, failed;
         long bytes, byteOffloaded1, byteOffloaded2;
