@@ -94,8 +94,12 @@ public class InfrastructureRouter extends ActiveRouter {
         Message transferred = con.getMessage();
         if (transferred.getRequest() != null) {
             if (transferred.getTo() == transferred.getRequest().getFrom()) {
-                deleteMessage(transferred.getId(),false);
-                deleteMessage(transferred.getRequest().getId(),false);
+                if (getMessage(transferred.getId()) != null) {
+                    deleteMessage(transferred.getId(),false);
+                }
+                if (getMessage(transferred.getRequest().getId()) != null) {
+                    deleteMessage(transferred.getRequest().getId(),false);
+                }
             }
         }
     }
