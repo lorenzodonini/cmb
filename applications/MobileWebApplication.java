@@ -2,18 +2,24 @@ package applications;
 
 import core.*;
 import routing.ActiveRouter;
-import routing.OffloadingRouter;
 import tum_model.WebPage;
 import tum_model.WebPageDb;
 
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 
-
+/**
+ * This application is thought to be run on mobile nodes. It provides automatic message
+ * generation within a variable time interval and handles responses to messages.<br>
+ * Each request contains a unique identified for a desired WebPage, obtained randomly
+ * from the {@link WebPageDb}. A response to a specific message contains the WebPage
+ * associated to the requested ID.
+ * The application itself does not handle routing policies, although it supports a caching mechanism.
+ * <br>
+ * Nodes exploiting an {@link routing.OffloadingRouter} are eligible to use this application.
+ */
 public class MobileWebApplication extends Application {
-    private final static String NS_TIME_INTERVAL = "requestInterval";
-    private final static String NS_REQ_SIZE = "requestSize";
 
     /** The minimum time between two consecutive requests (i.e. message generation).
      * The idea of having a minimum and a maximum time allows to keep some degree of randomness
@@ -45,7 +51,11 @@ public class MobileWebApplication extends Application {
 
     //Settings
     /** Setting name for the maximum size of the cache */
-    private static final String NS_CACHE_SIZE = "cacheSize";
+    private static final String S_CACHE_SIZE = "cacheSize";
+    /** Setting name for the desired interval span between requests */
+    private final static String S_TIME_INTERVAL = "requestInterval";
+    /** Setting name for the size of the request. Size in bytes. */
+    private final static String S_REQ_SIZE = "requestSize";
 
     /** Application ID */
     public static final String APP_ID = "tum.cmb.team4.MobileWebApplication";
@@ -53,15 +63,28 @@ public class MobileWebApplication extends Application {
     /** Message Prefix */
     private final static String MESSAGE_PREFIX = "M";
 
+    //Listener events
+    public static final String E_RESP_RECEIVED = "ResponseReceived";
+    public static final String E_REQ_SENT_P2P = "RequestSentP2P";
+    public static final String E_REQ_SENT_OFFLOADED = "RequestSentOffloaded";
+    public static final String E_REQ_SENT_WIFI = "RequestSentWifi";
+    public static final String E_REQ_SENT_CELLULAR = "RequestSentCellular";
+    //Types used by the application listener
+    public static final byte REQ_TYPE_NONE = 0;
+    public static final byte REQ_TYPE_CELLULAR = 1;
+    public static final byte REQ_TYPE_WIFI = 2;
+    public static final byte REQ_TYPE_OFFLOAD = 3;
+    public static final byte REQ_TYPE_P2P = 4;
+
 
     /** Proto constructor */
     public MobileWebApplication(Settings s) {
-        int interval [] = s.getCsvInts(NS_TIME_INTERVAL);
+        int interval [] = s.getCsvInts(S_TIME_INTERVAL);
         minRequestInterval = interval[0];
         maxRequestInterval = interval[1];
-        requestSize = s.getInt(NS_REQ_SIZE);
-        if (s.contains(NS_CACHE_SIZE)) {
-            mCacheSize = s.getInt(NS_CACHE_SIZE);
+        requestSize = s.getInt(S_REQ_SIZE);
+        if (s.contains(S_CACHE_SIZE)) {
+            mCacheSize = s.getInt(S_CACHE_SIZE);
         }
         else {
             mCacheSize = 0;
@@ -88,6 +111,14 @@ public class MobileWebApplication extends Application {
         nextRequestTime = mRandom.nextInt(maxRequestInterval - minRequestInterval) + minRequestInterval;
     }
 
+    /** Checks the internal cache for a specific {@link WebPage},
+     * in order to provide P2P offloading functionality.
+     * If the page associated to the passed id is in cache, it is returned, otherwise it
+     * means that that page was not cached before (or has already been deleted).
+     *
+     * @param requestedId  The id of the WebPage that needs to be looked for.
+     * @return  Returns the page associated to the id if found, null otherwise.
+     */
     private WebPage checkCacheForWebPage(int requestedId) {
         if (cachedWebPages == null) {
             return null;
@@ -98,6 +129,20 @@ public class MobileWebApplication extends Application {
             }
         }
         return null;
+    }
+
+    private void refreshItemInCache(WebPage wp) {
+        Iterator<WebPage> it = cachedWebPages.iterator();
+        while (it.hasNext()) {
+            WebPage cached = it.next();
+            /* In case we already have the same WebPage in cache, we still want to keep it in cache,
+            but prioritize it accordingly, by bumping it to the end of the list. By doing this,
+            we avoid having the same element multiple times in the cache. */
+            if (cached.id == wp.id) {
+                it.remove();
+                return;
+            }
+        }
     }
 
     @Override
@@ -111,6 +156,8 @@ public class MobileWebApplication extends Application {
         message will still be the same. */
         if (msg.getRequest() != null) {
             host.deleteMessage(msg.getRequest().getId(), false);
+            //Reporting a received message
+            sendEventToListeners(E_RESP_RECEIVED,msg,host);
         }
 
         //We check if there is a policy to keep some pages in cache
@@ -123,6 +170,7 @@ public class MobileWebApplication extends Application {
         if (lastWP != null) {
             //Handling a response message
             //Caching
+            refreshItemInCache((WebPage)lastWP);
             if (cachedWebPages.size() >= mCacheSize) {
                 cachedWebPages.removeFirst();
             }
@@ -181,9 +229,18 @@ public class MobileWebApplication extends Application {
             if (mCacheSize > 0) {
                 //Checking if we are requesting a page we have in cache ourselves already
                 if (checkCacheForWebPage(randPage) != null) {
-                    //TODO: TO CHANGE
-                    sendEventToListeners(id+" delivered to source host",null,host);
-                    host.deleteMessage(id,false);
+                    // The same page is in cache already. No need to send out any requests, but to
+                    // simulate the correct behavior we still create a response and handle it.
+                    // Original message will be automatically deleted inside the handle method.
+                    sendEventToListeners(E_REQ_SENT_P2P,new Object[] {m,SimClock.getTime()},host);
+                    WebPage page = WebPageDb.getInstance().getPageById(randPage);
+                    Message response = new Message(host, host,
+                            ActiveRouter.RESPONSE_PREFIX + m.getId(), page.size);
+                    response.setRequest(m);
+                    response.addProperty(WebPageDb.WEB_PAGE_PROPERTY,page);
+                    response.setAppID(MobileWebApplication.APP_ID);
+                    // Response listener is called directly in the handle method
+                    handle(response,host);
                 }
             }
 
