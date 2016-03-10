@@ -96,7 +96,6 @@ public class OffloadingRouter extends ActiveRouter {
                 if (tryMessageToPeers(m,triedNeighbors)) {
                     // Not removing the message itself, because this will be done by
                     // the application, in case we receive a response from a peer.
-
                     return; //We managed to start the transfer
                 }
             }
@@ -151,30 +150,6 @@ public class OffloadingRouter extends ActiveRouter {
         return false;
     }
 
-    /*
-    OLD LOGIC, NOT USED ANYMORE
-    private boolean tryMessageToPeers(Message m, List<Connection> peers) {
-        //Replicating the original message, since we are playing around with the app ID
-        Message replica = m.replicate();
-        //Peers won't handle this message unless we set this app id
-        replica.setAppID(MobileWebApplication.APP_ID);
-
-        //Trying to send the message
-        Iterator<Connection> it = peers.iterator();
-        while (it.hasNext()) {
-            Connection con = it.next();
-            int retVal = startTransfer(replica,con);
-            //We tried to this neighbor already, don't wanna do it again in the future -> remove it
-            it.remove();
-            if (retVal == RCV_OK) {
-                return true; //Accepted the message, don't try others
-            }
-            /* In case retVal is != RCV_OK, something went wrong. Maybe the neighbor went out of range.
-            We don't care and move on. That peer has been deleted from the neighbor list anyway.
-        }
-        return false;
-    }*/
-
     private boolean tryMessageToInternet(Message m) {
         for (Connection con : currentHotspots) {
             //Trying over WiFi first, by default
@@ -195,27 +170,6 @@ public class OffloadingRouter extends ActiveRouter {
         //If none of the above work, it means there is currently not connection at all
         return false;
     }
-
-    /*private List<Connection> getWifiNeighbors() {
-        List<Connection> neighbors = new LinkedList<>();
-        InfrastructureManager infrastructure = InfrastructureManager.getInstance();
-        DTNHost host = getHost();
-
-        for (NetworkInterface i: getHost().getInterfaces()) {
-            //Only doing this for the proper interface
-            if (i instanceof WLANInterface) {
-                //Checking all connections over the WLAN interface
-                for (Connection con: i.getConnections()) {
-                    //If the other endpoint of the connection isn't an infrastructure node,
-                    // then it's a peer (neighbor)
-                    if (!infrastructure.isWLANHotspot(con.getOtherNode(host))) {
-                        neighbors.add(con);
-                    }
-                }
-            }
-        }
-        return neighbors;
-    }*/
 
     @Override
     public void changedConnection(Connection con) {
@@ -261,104 +215,18 @@ public class OffloadingRouter extends ActiveRouter {
         }
     }
 
-    /*@Override
-    public void update() {
-        super.update();
+    @Override
+    protected void transferDone(Connection con) {
+        super.transferDone(con);
 
-        if (isTransferring() || !canStartTransfer()) {
-            return; // transferring, don't try other connections yet
-        }
-
-        // Try first the messages that can be delivered to final recipient
-        Connection delivered = exchangeDeliverableMessages();
-        if (delivered != null) {
-            // We still return, since a transfer was started. This may be because the router delivered
-            //a message to its final recipient, or because the router asked the
-            //connected hosts for further messages.
-            System.out.println(getHost().toString()+ " - exchangeDeliverableMessages complete");
-            return;
-        }
-
-        List<Message> messages = new ArrayList<>(getMessageCollection());
-        sortByQueueMode(messages);
-        for (Message m : messages) {
-            //OffloadingMessageEventGenerator already takes case of getting a random page ID
-            Message routed = null;
-            switch (mMode) {
-                case NORMAL:
-                    for (NetworkInterface i: getHost ().getInterfaces()) {
-                        //We will use the first interface we find.
-                        // Typically there should be only one anyway (either 3G or WLAN)
-                        if (i instanceof WLANInterface) {
-                            routed = routeToWifiRouter(m, (WLANInterface)i);
-                            break;
-                        }
-                        else if (i instanceof CellularInterface) {
-                            routed = routeToCellularTower(m, (CellularInterface)i);
-                            break;
-                        }
-                    }
-                    break;
-                case WIFI_OFFLOADING:
-                    for (NetworkInterface i: getHost ().getInterfaces()) {
-                        if (i instanceof WLANInterface) {
-                            routed = routeToWifiRouter(m, (WLANInterface)i);
-                            break;
-                        }
-                    }
-                    break;
-                case P2P_CACHING:
-                    for (NetworkInterface i: getHost ().getInterfaces()) {
-                        if (i instanceof WLANInterface) {
-                            routed = routeToPeer(m, (WLANInterface)i);
-                            break;
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-            if (routed != null) {
-                System.out.println(getHost().toString() + " - message routed");
-                break;
-            }
+        Message transferred = con.getMessage();
+        if(transferred.getProperty(MobileWebApplication.PROP_P2P_RESPONSE) != null) {
+            /* Removing the response message from the queue directly.
+            We know that is was delivered already, and since we don't want the
+            router to try resending it until the TLL expires, we drop it immediately. */
+            deleteMessage(transferred.getId(),false);
         }
     }
-
-    private Message routeToWifiRouter(Message m, WLANInterface wi) {
-        for (Connection con : wi.getConnections()) {
-            //Checking if the connection is to a WiFi router
-
-            if (con.getOtherInterface(wi).getHost().getRouter() instanceof InfrastructureRouter) {
-                int retVal = startTransfer(m, con);
-                if (retVal == RCV_OK) {
-                    return m; //Accepted m, don't try others
-                }
-                else if (retVal > 0) {
-                    return null; //Couldn't send message through to WiFi router
-                }
-            }
-        }
-        return null; //WiFi router not found
-    }
-
-    private Message routeToCellularTower(Message m, CellularInterface ci) {
-        DTNHost cellularTower = InfrastructureManager.getInstance().getCellularTower();
-        for (Connection con : ci.getConnections()) {
-            if (con.getOtherInterface(ci).getHost() == cellularTower) {
-                int retVal = startTransfer(m, con);
-                if (retVal == RCV_OK) {
-                    return m; //Accepted m, don't try others
-                }
-            }
-        }
-        return null; //Cellular tower not found
-    }
-
-    private Message routeToPeer(Message m, WLANInterface wi) {
-        //Send message to all known connections?! Besides WiFi router maybe?!
-        return m;
-    }*/
 
     @Override
     public MessageRouter replicate() {

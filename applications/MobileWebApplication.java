@@ -75,6 +75,8 @@ public class MobileWebApplication extends Application {
     public static final byte REQ_TYPE_WIFI = 2;
     public static final byte REQ_TYPE_OFFLOAD = 3;
     public static final byte REQ_TYPE_P2P = 4;
+    //Property used for P2P responses
+    public static final String PROP_P2P_RESPONSE = "p2pResponse";
 
 
     /** Proto constructor */
@@ -161,7 +163,7 @@ public class MobileWebApplication extends Application {
         }
 
         //We check if there is a policy to keep some pages in cache
-        if (msg.getTo() != host || mCacheSize <= 0) {
+        if (mCacheSize <= 0) {
             //We don't cache anything, nothing else happens
             return msg;
         }
@@ -195,6 +197,7 @@ public class MobileWebApplication extends Application {
                     //By setting the original request, we already have the full path, needed for routing purposes
                     m.setRequest(msg);
                     m.setAppID(MobileWebApplication.APP_ID);
+                    m.addProperty(PROP_P2P_RESPONSE,true);
 
                     //Response message gets created, this will be routed inside the update function (of the router)
                     host.createNewMessage(m);
@@ -204,7 +207,9 @@ public class MobileWebApplication extends Application {
             //If we don't have the requested web page in cache, we DO NOT send a reply
         }
 
-        return msg;
+        // Since we are not the final recipient of P2P messages, we don't want to store
+        // the request message anyway. If we did, we would have to route it to the internet afterwards. Nope!
+        return null;
     }
 
     @Override
