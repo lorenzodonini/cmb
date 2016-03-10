@@ -22,9 +22,6 @@ public class InternetApplication extends Application {
     /** Application ID */
     public static final String APP_ID = "tum.cmb.team4.InternetApplication";
 
-    private Map<ActiveRouter, List<Double>> pendingRequests;
-    private Map<ActiveRouter, List<WebPage>> finishedRequests;
-
     /** Instance of a {@link WebPageDb}. This is actually singleton and could be accessed statically
      * for every call, but a direct reference is stored here as an optimization.
      * This is because the internet application has to respond to all mobile nodes and this database,
@@ -32,9 +29,6 @@ public class InternetApplication extends Application {
     private WebPageDb internet;
 
     public InternetApplication(Settings s) {
-        pendingRequests = new HashMap<>();
-        finishedRequests = new HashMap<>();
-
         WebPageDb.initWebPageDb(s.getInt(S_PAGE_COUNT), s.getInt(S_MIN_SIZE), s.getInt(S_MAX_SIZE));
         internet = WebPageDb.getInstance();
         super.setAppID(APP_ID);
@@ -42,8 +36,6 @@ public class InternetApplication extends Application {
 
     public InternetApplication(InternetApplication other) {
         super(other);
-        pendingRequests = new HashMap<>();
-        finishedRequests = new HashMap<>();
         internet = other.internet;
     }
 

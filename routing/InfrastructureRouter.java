@@ -72,21 +72,6 @@ public class InfrastructureRouter extends ActiveRouter {
         return null;
     }
 
-    /*@Override
-    public Message messageTransferred(String id, DTNHost from) {
-        Message transferred = super.messageTransferred(id, from);
-
-        /* This is a passive infrastructure router. If it received a response,
-        then it was because a request message had been relayed before that.
-        Once a valid response has been received, the request message should
-        never be relayed again.
-        if (transferred.getRequest() != null) {
-            deleteMessage(transferred.getRequest().getId(),false);
-        }
-
-        return transferred;
-    }*/
-
     @Override
     protected void transferDone(Connection con) {
         super.transferDone(con);
