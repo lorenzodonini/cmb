@@ -157,7 +157,13 @@ public class MobileWebApplication extends Application {
         This also works for replies from peers, as the ID contained in the request
         message will still be the same. */
         if (msg.getRequest() != null) {
-            host.deleteMessage(msg.getRequest().getId(), false);
+            String id = msg.getRequest().getId();
+            for (Message m : host.getMessageCollection()) {
+                if (m.getId().equals(id)) {
+                    host.deleteMessage(id, false);
+                    break;
+                }
+            }
             //Reporting a received message
             sendEventToListeners(E_RESP_RECEIVED,msg,host);
         }
