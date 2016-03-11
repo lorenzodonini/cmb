@@ -224,7 +224,9 @@ public class OffloadingRouter extends ActiveRouter {
             /* Removing the response message from the queue directly.
             We know that is was delivered already, and since we don't want the
             router to try resending it until the TLL expires, we drop it immediately. */
-            deleteMessage(transferred.getId(),false);
+            if (getMessage(transferred.getId()) != null) {
+                deleteMessage(transferred.getId(), false);
+            }
         }
     }
 
